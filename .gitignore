@@ -1,0 +1,8 @@
+# Per-change ship script (filled in by the agent each cycle; template lives
+# in .ship_change.sh.sample).
+ship_change.sh
+
+# Build trees
+build/
+build-*/
+cmake-build-*/

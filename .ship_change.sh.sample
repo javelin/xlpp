@@ -1,99 +1,68 @@
 #!/usr/bin/env bash
 # =============================================================================
-# ship_change.sh — self-contained "ship a change" helper (xlpp)
+# .ship_change.sh.sample — template for the "ship a change" helper (xlpp)
 #
-# WHY THIS IS SELF-CONTAINED:
-# The sandbox agent does not run any git write commands, because git locks it
-# creates on the shared .git dir get owned by your user and can't be cleaned up
-# from the sandbox (the recurring ".git/index.lock: Operation not permitted").
-# So ALL git operations happen here, on your machine, where locks clear cleanly.
+# WORKFLOW:
+# The sandbox agent never runs git write commands (its .git locks can't be
+# cleaned up from the sandbox). Instead, the agent edits files in the working
+# tree (on master) and writes a filled-in copy of this template to
+# ship_change.sh (untracked, gitignored). You then run it from the repo root:
 #
-# The agent just edits files in the working tree (on master). This script then:
-#   1. Clears any stale lock
-#   2. Creates the feature branch off origin/master, CARRYING those edits onto
-#      it (nothing is ever committed on master)
-#   3. Runs any extra git setup for this change (e.g. submodule add)
-#   4. Creates the issue via gh (captures the number)
-#   5. Stages ONLY the listed paths, commits as "Issue #<N>: ...", pushes
-#   6. Prints the PR link
+#   ./ship_change.sh
 #
-# NOTE: this repo's main branch is `master`, not `main`.
-#
-# Run from the repo root:  ./ship_change.sh
+# It: clears stale locks -> branches off origin/master carrying the edits ->
+# runs any extra git setup (submodules, untracking) -> creates the GitHub
+# issue via gh -> stages ONLY the listed paths -> commits "Issue #<N>: ..." ->
+# pushes -> prints the PR link. PR creation, merge, and master sync stay
+# manual. NOTE: this repo's main branch is `master`, not `main`.
 # =============================================================================
 set -euo pipefail
 
 # ------------------------------- CONFIG --------------------------------------
-# The agent fills these in for each change before you run the script.
+# The agent fills these in for each change.
 
 REPO="javelin/xlpp"
 PARENT_REF="origin/master"        # always branch off the remote master
-BRANCH="chore/xlnt-submodule-and-docs"
+BRANCH=""                         # e.g. "feat/phase1-parser"
 
 # Files to stage (only these are added — nothing else). Paths created by the
-# EXTRA GIT SETUP step below may be listed even though they don't exist yet;
+# EXTRA GIT SETUP step may be listed even though they don't exist yet;
 # existence is only enforced for paths in FILES_MUST_EXIST.
 FILES=(
-  "ship_change.sh"
-  "ai_rules.md"
-  "docs/PRD.md"
-  "docs/IMPLEMENTATION_PLAN.md"
-  "docs/analysis.json"
-  ".gitmodules"
-  "third_party/xlnt"
 )
 
 FILES_MUST_EXIST=(
-  "ship_change.sh"
-  "ai_rules.md"
-  "docs/PRD.md"
-  "docs/IMPLEMENTATION_PLAN.md"
-  "docs/analysis.json"
 )
 
-# Submodule for this change (leave SUBMODULE_PATH empty for changes without one).
-SUBMODULE_URL="git@github.com:javelin/xlnt.git"
-SUBMODULE_PATH="third_party/xlnt"
+# Optional: submodule to add in this change (leave empty when none).
+SUBMODULE_URL=""
+SUBMODULE_PATH=""
 
-ISSUE_TITLE="Bootstrap repo: xlnt submodule, PRD + implementation plan, ship workflow"
+# Optional: tracked paths to remove from the index (kept on disk) in this
+# change, e.g. a file newly added to .gitignore (leave empty when none).
+UNTRACK_PATHS=(
+)
+
+ISSUE_TITLE=""
 
 read -r -d '' ISSUE_BODY <<'EOF' || true
 ## Purpose
-Bootstrap the xlpp repository — the C++ formula-evaluation engine for the
-PIXls power-supply design spreadsheets (see docs/PRD.md).
 
 ## Change
-- Add `xlnt` (javelin fork) as a submodule at `third_party/xlnt`. The fork is
-  used so xlnt gaps found in the corpus analysis (defined-name values and
-  calcPr iteration settings are dropped by the reader) can be patched if the
-  side-parse approach proves insufficient (PRD §6).
-- Add `docs/PRD.md`, `docs/IMPLEMENTATION_PLAN.md`, and the raw corpus
-  analysis data (`docs/analysis.json`, 14-file sample of the 99 workbooks).
-- Track `ai_rules.md` (engineering rules) and `ship_change.sh` (this
-  workflow: agent edits files, all git/gh operations run locally).
 
 ## Verification
-- Script creates the branch off origin/master, adds the submodule, stages only
-  the listed paths, and pushes; nothing is committed on master.
-- After merge: `git submodule update --init` then confirm
-  `third_party/xlnt/CMakeLists.txt` exists.
 EOF
 
-COMMIT_SUBJECT="Bootstrap repo: xlnt submodule, docs, ship workflow"
+COMMIT_SUBJECT=""
 
 read -r -d '' COMMIT_BODY <<'EOF' || true
-Add xlnt (javelin fork) as submodule at third_party/xlnt for the xlpp formula
-engine (fork allows patching reader gaps: defined-name values and calcPr
-iteration settings, PRD section 6). Add PRD, phased implementation plan, and
-raw corpus analysis of the PIXls spreadsheets (44-function inventory, 15
-iterative-calc workbooks, INDIRECT patterns). Track ai_rules.md and the
-ship_change.sh workflow script.
 EOF
 # -----------------------------------------------------------------------------
 
 # --------------------------- PRE-FLIGHT CHECKS -------------------------------
-# Clear any stale git lock first (runs as YOU, so it can actually remove it).
-rm -f .git/*.lock
+# Clear any stale git locks first (runs as YOU, so it can actually remove
+# them) — including submodule git dirs under .git/modules/.
+find .git -name "*.lock" -type f -delete 2>/dev/null || true
 
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "ERROR: not inside a git repo. cd to the repo root first."; exit 1; }
 command -v gh >/dev/null 2>&1 || { echo "ERROR: gh (GitHub CLI) not found."; exit 1; }
@@ -129,7 +98,7 @@ if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
   echo "ERROR: expected to be on '${BRANCH}' but on '${CURRENT_BRANCH}'. Aborting before commit."; exit 1
 fi
 
-# ---------------------- 2. EXTRA GIT SETUP (submodule) -----------------------
+# ------------------ 2. EXTRA GIT SETUP (submodule/untrack) -------------------
 if [ -n "$SUBMODULE_PATH" ]; then
   if git config --file .gitmodules --get "submodule.${SUBMODULE_PATH}.url" >/dev/null 2>&1; then
     echo ">> Submodule '${SUBMODULE_PATH}' already registered — skipping add."
@@ -137,6 +106,11 @@ if [ -n "$SUBMODULE_PATH" ]; then
     echo ">> Adding submodule ${SUBMODULE_URL} at ${SUBMODULE_PATH}..."
     git submodule add "$SUBMODULE_URL" "$SUBMODULE_PATH"
   fi
+fi
+
+if [ "${#UNTRACK_PATHS[@]}" -gt 0 ]; then
+  echo ">> Untracking (keeping on disk): ${UNTRACK_PATHS[*]}"
+  git rm --cached --quiet -- "${UNTRACK_PATHS[@]}"
 fi
 
 # --------------------------- 3. CREATE ISSUE ---------------------------------

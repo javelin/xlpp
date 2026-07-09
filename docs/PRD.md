@@ -4,11 +4,11 @@
 
 ## 1. Problem
 
-The `pixls` folder contains 99 `.xlsx` workbooks — Power Integrations PIXls calculation engines for power-supply designs (flyback, buck, boost, PFC, LLC, etc.). Each workbook takes design inputs (line voltage, output power, device selection) and computes a full design via cell formulas. Today the only way to run these calculations is Excel. The goal is a C++ library, built on **xlnt**, that opens these workbooks and evaluates their formulas natively — a calculation engine tailored to exactly the formula subset these files use, not a general Excel clone.
+The `pixls` folder contains 97 `.xlsx` workbooks — Power Integrations PIXls calculation engines for power-supply designs (flyback, buck, boost, PFC, LLC, etc.). Each workbook takes design inputs (line voltage, output power, device selection) and computes a full design via cell formulas. Today the only way to run these calculations is Excel. The goal is a C++ library, built on **xlnt**, that opens these workbooks and evaluates their formulas natively — a calculation engine tailored to exactly the formula subset these files use, not a general Excel clone.
 
 ## 2. Goals
 
-- Open any of the 99 workbooks via xlnt, set input cells, recalculate, and read output cells with results matching Excel.
+- Open any of the 97 workbooks via xlnt, set input cells, recalculate, and read output cells with results matching Excel.
 - Support 100% of the formula constructs actually present in the corpus — nothing more.
 - Verification oracle: every workbook ships with cached formula results; the engine must reproduce them.
 
@@ -50,7 +50,7 @@ Key findings:
 
 **INDIRECT is confined and stereotyped.** 2,642 of 2,647 INDIRECT calls are in one file (LYTSwitch-4) and all follow one pattern: `INDIRECT(CONCATENATE("Calcs!AL", Y7))` — a computed row number on a fixed sheet/column. `ADDRESS` (10 uses, LNK-PL only) is similar. Full dynamic-reference generality is not required.
 
-**Iterative calculation is required.** 15 of 99 workbooks (whole-corpus scan) set `iterate="true"` with `iterateCount="100" iterateDelta="0.001"` — they contain intentional circular references solved by fixed-point iteration (LinkSwitch/LNK/TOP families).
+**Iterative calculation is required.** 15 of 97 workbooks (whole-corpus scan) set `iterate="true"` with `iterateCount="100" iterateDelta="0.001"` — they contain intentional circular references solved by fixed-point iteration (LinkSwitch/LNK/TOP families).
 
 **Error values are part of normal operation.** Cached results include thousands of `#N/A` (6,069 in three files alone), plus `#VALUE!`, `#DIV/0!`, `#REF!`. Error propagation and `ISNA`/`ISERROR` semantics must match Excel.
 
@@ -73,7 +73,7 @@ Key findings:
 
 ### 5.2 Non-Functional
 
-- **NFR1 — Correctness:** ≥ 99.9% cell-match vs cached values per workbook across all 99 files; 100% on the 14-file sample. Mismatches must be individually explainable (e.g. stale cache in file).
+- **NFR1 — Correctness:** ≥ 99.9% cell-match vs cached values per workbook across all 97 files; 100% on the 14-file sample. Mismatches must be individually explainable (e.g. stale cache in file).
 - **NFR2 — Performance:** Full recalc of the largest workbook (≈154k formulas) in < 2 s on a desktop; incremental recalc after one input change proportional to the dirty set.
 - **NFR3 — Portability:** C++17, CMake, dependencies limited to xlnt and its bundled third-party libs. Same platforms xlnt supports.
 - **NFR4 — Robustness:** A formula construct outside the supported subset must produce a per-cell diagnostic (`#NAME?`-style), never a crash or silent wrong number.
@@ -91,7 +91,7 @@ Gaps the project must cover:
 
 ## 7. Success Metrics
 
-- Verification harness passes NFR1 thresholds on all 99 workbooks.
+- Verification harness passes NFR1 thresholds on all 97 workbooks.
 - Round-trip demo: change `VACMIN`/`PO`-class inputs on three workbook families, recalc, outputs match Excel to 6 significant digits.
 - Library consumable via CMake `add_subdirectory`/`find_package` with a ≤ 20-line usage example.
 
@@ -101,8 +101,8 @@ Gaps the project must cover:
 |---|---|---|
 | Cached values stale (file saved without full recalc) | Medium | Tolerance policy + cross-check questionable cells in Excel/LibreOffice; whitelist known-stale cells |
 | Floating-point divergence from Excel (transcendentals, `^`) | Medium | Relative tolerance 1e-9 in harness; exactness only where Excel guarantees it |
-| Unsampled files contain constructs outside the 44-function inventory | Medium | Phase 1 runs the inventory scan on **all 99 files**, not just the sample, before evaluator work starts |
-| xlnt load failures on edge files | Low | Phase 0 loads all 99 files first |
+| Unsampled files contain constructs outside the 44-function inventory | Medium | Phase 1 runs the inventory scan on **all 97 files**, not just the sample, before evaluator work starts |
+| xlnt load failures on edge files | Low | Phase 0 loads all 97 files first |
 | `TEXT`/`FIXED` format-code semantics | Low | Only implement format codes observed in corpus |
 
 ## 9. Open Questions
