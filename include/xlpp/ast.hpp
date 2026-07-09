@@ -66,6 +66,10 @@ public:
         return nodes_[id];
     }
 
+    Node &mutable_at(NodeId id) {
+        return nodes_[id];
+    }
+
     std::size_t size() const {
         return nodes_.size();
     }

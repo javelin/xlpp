@@ -68,6 +68,26 @@ xlpp/
 - Write the lexer + recursive-descent parser + AST; parse **every formula in the corpus** (≈600k cells) with zero failures.
 - **Exit criterion (hard gate):** 100% parse rate corpus-wide; round-trip pretty-printer output re-parses to identical AST.
 
+> **Phase 2+3 were merged** (approved 2026-07-09): the Phase 2 exit gate requires
+> defined names and lookups, which were slated for Phase 3. Additional findings
+> during execution, now part of the architecture:
+>
+> - **Evaluation is demand-driven**, not static-topo: static range dependencies
+>   over-approximate (device tables overlap computed columns, e.g. TNY-4's
+>   `TinySwitch_4_Table` includes calc cells), which would flag Excel-legal
+>   workbooks as circular. The engine keeps the static graph only as a Kahn
+>   scheduling hint; evaluation reads cells on demand via an explicit work
+>   stack (`PendingCell` retry, no deep recursion), and only a cell read
+>   *while it is itself being evaluated* is a true cycle — matching Excel.
+> - **Shared formulas require translation** (PRD §6 gap 5): implemented as a
+>   sheet-XML side-parse producing per-member translated formulas.
+> - **Reference-vs-literal argument semantics**: aggregates and AND/OR skip
+>   text/booleans behind references but coerce literal arguments.
+> - **Oracle whitelist** (planned for Phase 6) pulled forward: 526 cells with
+>   individually explained cached-value defects (474 provably stale `#VALUE!`
+>   region in HiperPFS3; 51 FP-cancellation residues in InnoSwitch3CP KP1
+>   Newton intermediates; 1 stale cell in DPAFwd) — `tools/verify_whitelist.tsv`.
+
 ## Phase 2 — Evaluator core, acyclic engine (≈2 weeks)
 
 - Value model, error propagation, implicit conversions (Excel coercion rules: "" vs blank vs 0, bool→number, text→number in arithmetic).

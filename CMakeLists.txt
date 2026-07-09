@@ -22,9 +22,15 @@ add_subdirectory(third_party/xlnt)
 # already compiled into libxlnt.a for zip access.
 add_library(xlpp_core STATIC
     src/ast.cpp
+    src/engine.cpp
+    src/eval.cpp
     src/lexer.cpp
     src/parser.cpp
+    src/shared_formulas.cpp
     src/sidecar.cpp
+    src/value.cpp
+    src/workbook_model.cpp
+    src/xml_scan.cpp
 )
 target_include_directories(xlpp_core
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -41,3 +47,7 @@ target_compile_options(xlpp_probe PRIVATE -Wall -Wextra)
 add_executable(parse_corpus tools/parse_corpus.cpp)
 target_link_libraries(parse_corpus PRIVATE xlpp_core)
 target_compile_options(parse_corpus PRIVATE -Wall -Wextra)
+
+add_executable(verify tools/verify.cpp)
+target_link_libraries(verify PRIVATE xlpp_core)
+target_compile_options(verify PRIVATE -Wall -Wextra)

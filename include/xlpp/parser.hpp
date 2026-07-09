@@ -32,4 +32,8 @@ private:
 // Throws ParseError or LexError on any input outside the frozen grammar.
 Ast parse_formula(const std::string &formula);
 
+// Parses a bare A1 reference like "B5" or "$AC$12". Returns false if the text
+// is not a valid single-cell reference.
+bool parse_a1_reference(const std::string &text, CellAddress &address);
+
 } // namespace xlpp
