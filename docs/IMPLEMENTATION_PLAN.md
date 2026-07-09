@@ -83,10 +83,11 @@ xlpp/
 - Text functions used by lookups/labels: MID, LEN, SEARCH, TEXT, FIXED, VALUE (only corpus-observed format codes).
 - **Exit:** ≥ 99.9% match on InnoSwitchCP, TNY-4, LYTSwitch5_Buck, InnoSwitch3CP, InnoSwitch4CZ, HiperPFS3. Every mismatch triaged.
 
-## Phase 4 — Dynamic references (≈1 week)
+## Phase 4 — Dynamic references & special constructs (≈1 week)
 
-- INDIRECT + ADDRESS with dynamic-dependency feedback loop.
-- **Exit:** ≥ 99.9% match on ACDC_LYTSwitch-4_Flyback_Rev1 (121k formulas, 2.6k INDIRECT) and LYTSwitch-0_Rev1 (154k formulas). Perf: full recalc < 2 s each.
+- INDIRECT + ADDRESS with dynamic-dependency feedback loop; OFFSET (single corpus use, range-shift feeding VLOOKUP).
+- CSE array blocks: the six `{=MMULT(MINVERSE(7×7), 7×1)}` blocks in ACDC_LYTSwitch1_BuckBoost_Rev1 (Phase 1 corpus-scan finding) — fixed-size matrix solve spilled over the anchor block; no general array machinery.
+- **Exit:** ≥ 99.9% match on ACDC_LYTSwitch-4_Flyback_Rev1 (121k formulas, 2.6k INDIRECT), LYTSwitch-0_Rev1 (154k formulas), and ACDC_LYTSwitch1_BuckBoost_Rev1. Perf: full recalc < 2 s each.
 
 ## Phase 5 — Iterative calculation (≈1 week)
 
