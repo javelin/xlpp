@@ -21,6 +21,9 @@ add_subdirectory(third_party/xlnt)
 # (defined-name values/scope and calcPr iteration settings). Uses the miniz
 # already compiled into libxlnt.a for zip access.
 add_library(xlpp_core STATIC
+    src/ast.cpp
+    src/lexer.cpp
+    src/parser.cpp
     src/sidecar.cpp
 )
 target_include_directories(xlpp_core
@@ -34,3 +37,7 @@ target_compile_options(xlpp_core PRIVATE -Wall -Wextra)
 add_executable(xlpp_probe tools/probe.cpp)
 target_link_libraries(xlpp_probe PRIVATE xlpp_core)
 target_compile_options(xlpp_probe PRIVATE -Wall -Wextra)
+
+add_executable(parse_corpus tools/parse_corpus.cpp)
+target_link_libraries(parse_corpus PRIVATE xlpp_core)
+target_compile_options(parse_corpus PRIVATE -Wall -Wextra)
