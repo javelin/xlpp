@@ -1,0 +1,1297 @@
+{
+ "files": [
+  {
+   "file": "ACDC_CP100X_Rev2.xlsx",
+   "size": 70403,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 117,
+   "defined_names_nonsimple": 7,
+   "sheets": [
+    {
+     "name": "CP100x",
+     "state": "visible",
+     "dims": "A1:IW153",
+     "formulas": 523
+    },
+    {
+     "name": "Transformer Construction",
+     "state": "visible",
+     "dims": "A1:AB213",
+     "formulas": 30
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:G16",
+     "formulas": 0
+    }
+   ],
+   "total_formulas": 553,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 2,
+   "external_ref_cells": 0,
+   "data_validations": 0,
+   "functions": {
+    "IF": 466,
+    "VLOOKUP": 33,
+    "FALSE": 33,
+    "INT": 12,
+    "CONCATENATE": 11,
+    "LOG": 6,
+    "AND": 4,
+    "OR": 4,
+    "W": 2,
+    "L": 2
+   },
+   "sample_long_formulas": [
+    "CP100x!C9: =IF(AND(VACMAX-VACMIN<120,$E$9>VLOOKUP(B16,Dragon_Power,8,FALSE())),\"Warning\",IF(AND(VACMAX-VACMIN>120,$E$9>VLOOKUP(B16,Dragon_Power,9,FALSE())),\"Warning\",\"\"))",
+    "CP100x!H9: =IF(AND(VACMAX-VACMIN<120,$E$9>VLOOKUP(B16,Dragon_Power,8,FALSE())),CONCATENATE(\"!!! For 115/230V INPUT : REDUCE PO<\",VLOOKUP(B16,Dragon_Power,8,FALSE()),\"W (larger Dragon_Power-II)\"),IF(AND(VACMAX-VACMIN>120,$E$9>VLOOKU",
+    "CP100x!H13: =IF(C13=\"Warning\",CONCATENATE(\"!!! Input capacitor is too small. Increase CIN above \",CMIN,\" uF to ensure VMIN>70 V\"),\"Input Capacitance\")",
+    "CP100x!K24: =VLOOKUP(B16,Dragon_Power,17,FALSE())-VLOOKUP(B16,Dragon_Power,15,FALSE())*(TILD/1000000000)+VMAX*(TILD/1000000000)/(lp/1000000)",
+    "CP100x!H25: =IF(E25<0.6,\"!!! INCREASE KP > 0.6 Increase VOR, Larger input capacitor, Larger DragonPower\",\"Ripple to Peak Current Ratio (0.6<KRP<1.0 : 1.0<KDP<6.0)\")",
+    "CP100x!E28: =IF(OR(B28=\"Auto\",B28=\"\"),IF(VMIN<180,IF(CC_Threshold=0,VLOOKUP(\"yes\",Core_Univ_CV,3,FALSE()),VLOOKUP(\"yes\",Core_Univ_CVCC,3,FALSE())),IF(CC_Threshold=0,VLOOKUP(\"yes\",Core_CV,3,FALSE()),VLOOKUP(\"yes\",Core_CVCC,3,FALSE())",
+    "CP100x!H28: =IF(OR(B28=\"Auto\",B28=\"\"),\"Suggested smallest commonly available core\",\"User-Selected transformer core\")",
+    "CP100x!K33: =IF(KP<1,1000000*PO*(((Z*(1-n))+n)/n)/((IP^2)*KP*(1-KP/2)*fSmin),1000000*PO*(((Z*(1-n))+n)/n)/((IP^2)*(1/2)*fSmin))",
+    "CP100x!K37: =(INT(100*(1000000*(((2*(VO*IO)*((1/(2*fL))-(3/1000)))/(n*((2*VACMIN*VACMIN)-(70*70))))))))/100",
+    "CP100x!E40: =IF(B40=\"\",((2*VACMIN^2)-((2*PO*((1/(2*fL))-(tC/1000)))/(n*(CIN/10^6))))^0.5,B40)",
+    "CP100x!H40: =IF(C40=\"\",\"Minimum DC Input Voltage\",\"!!! Minimum DC Input Voltage < 70 Volts. Increase VACMIN or increase CIN\")",
+    "CP100x!H44: =IF($E$44>0.62,\"!!! REDUCE DMAX Dmax<0.62 (increase CIN, decrease VOR, increase fS Full Load)\",\"Maximum Duty Cycle\")"
+   ]
+  },
+  {
+   "file": "ACDC_InnoSwitch3CP_Flyback_Rev1.xlsx",
+   "size": 477316,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": true,
+   "defined_names": 437,
+   "defined_names_nonsimple": 0,
+   "sheets": [
+    {
+     "name": "InnoSwitch3-CP",
+     "state": "visible",
+     "dims": "A1:GI193",
+     "formulas": 15435
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:BO292",
+     "formulas": 89
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:L82",
+     "formulas": 4
+    },
+    {
+     "name": "Table Data",
+     "state": "visible",
+     "dims": "A1:BO106",
+     "formulas": 141
+    },
+    {
+     "name": "Empty1",
+     "state": "visible",
+     "dims": "A1:A1",
+     "formulas": 0
+    },
+    {
+     "name": "Empty2",
+     "state": "visible",
+     "dims": "A1:A1",
+     "formulas": 0
+    },
+    {
+     "name": "DesignEvaluation",
+     "state": "visible",
+     "dims": "A1:Y835",
+     "formulas": 840
+    },
+    {
+     "name": "DesignEvaluationCalc",
+     "state": "visible",
+     "dims": "A1:BT109",
+     "formulas": 5385
+    }
+   ],
+   "total_formulas": 21894,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 41,
+   "external_ref_cells": 0,
+   "data_validations": 1,
+   "functions": {
+    "IF": 26153,
+    "SQRT": 1416,
+    "VLOOKUP": 1142,
+    "PI": 806,
+    "MATCH": 478,
+    "AND": 411,
+    "INDEX": 382,
+    "MOD": 232,
+    "CEILING": 136,
+    "MAX": 32,
+    "OR": 20,
+    "INT": 16,
+    "LOG": 16,
+    "MIN": 13,
+    "CONCATENATE": 10,
+    "ROUND": 8,
+    "TEXT": 6,
+    "MID": 5,
+    "ISNUMBER": 1,
+    "SEARCH": 1,
+    "DB": 1,
+    "ISERROR": 1,
+    "SUM": 1
+   },
+   "sample_long_formulas": [
+    "InnoSwitch3-CP!H4: =IF(C4=\"Info\",\"Input voltage too high: Decrease the maximum AC input voltage or verify the voltage rating of the input capacitor\",\"Maximum AC input voltage\")",
+    "InnoSwitch3-CP!C10: =IF(E10<>MAX(E10,E17,E24,E31,E38,E45,E52,E59,E66),\"Info\",IF(VOUT1_CDC>27,\"Warning\",\"\"))",
+    "InnoSwitch3-CP!H10: =IF(C10=\"Info\",\"Enter the highest voltage in SET-POINT 1\",IF(C10=\"Warning\",\"The output voltage exceeds the Vout Pin voltage rating. Reduce the output voltage\",\"Output voltage 1, should be the highest output voltage requi",
+    "InnoSwitch3-CP!S10: =IF(AND(VAC_MIN>=O7,VAC_MIN<=P7,VAC_MAX>=Q7,VAC_MAX<=R7),S7,IF(AND(VAC_MIN>=O8,VAC_MIN<=P8,VAC_MAX>=Q8,VAC_MAX<=R8),S8,IF(AND(VAC_MIN>=O9,VAC_MIN<=P9,VAC_MAX>=Q9,VAC_MAX<=R9),S9,S7)))",
+    "InnoSwitch3-CP!H12: =IF(C12=\"Info\",\"The output power required exceeds the device capability: Verify thermal performance if no other warnings\",\"Output power 1\")",
+    "InnoSwitch3-CP!H13: =IF(C13=\"Warning\",\"Enter an appropriate converter efficiency between 0 and 1\",\"Converter efficiency for output 1\")",
+    "InnoSwitch3-CP!AA15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch3-CP!AB15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch3-CP!AC15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch3-CP!AD15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch3-CP!AE15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch3-CP!AF15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))"
+   ]
+  },
+  {
+   "file": "ACDC_InnoSwitch4CZ_USBPD_Flyback_Rev3.xlsx",
+   "size": 509696,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 421,
+   "defined_names_nonsimple": 1,
+   "sheets": [
+    {
+     "name": "InnoSwitch4-CZ_USBPD",
+     "state": "visible",
+     "dims": "A1:GI207",
+     "formulas": 13944
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:BO329",
+     "formulas": 72
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:Z83",
+     "formulas": 0
+    },
+    {
+     "name": "Table Data",
+     "state": "visible",
+     "dims": "A1:BA108",
+     "formulas": 234
+    },
+    {
+     "name": "Wire Tables",
+     "state": "visible",
+     "dims": "A1:AF197",
+     "formulas": 227
+    },
+    {
+     "name": "DesignEvaluation",
+     "state": "visible",
+     "dims": "A1:Y835",
+     "formulas": 839
+    },
+    {
+     "name": "Input Mapping",
+     "state": "visible",
+     "dims": "A1:B198",
+     "formulas": 0
+    },
+    {
+     "name": "Calculations",
+     "state": "visible",
+     "dims": "A1:U44",
+     "formulas": 24
+    },
+    {
+     "name": "DesignEvaluationCalc",
+     "state": "visible",
+     "dims": "A1:BR109",
+     "formulas": 5215
+    }
+   ],
+   "total_formulas": 20555,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 15,
+   "external_ref_cells": 0,
+   "data_validations": 0,
+   "functions": {
+    "IF": 25582,
+    "SQRT": 1281,
+    "VLOOKUP": 1060,
+    "PI": 675,
+    "MATCH": 465,
+    "AND": 396,
+    "INDEX": 370,
+    "MOD": 233,
+    "CONCATENATE": 200,
+    "CEILING": 182,
+    "OR": 54,
+    "MAX": 33,
+    "PDO": 27,
+    "MIN": 11,
+    "SUM": 11,
+    "APDO": 9,
+    "INT": 8,
+    "LOG": 8,
+    "ROUND": 4,
+    "ABS": 4,
+    "MID": 1,
+    "NOT": 1,
+    "ISERROR": 1
+   },
+   "sample_long_formulas": [
+    "InnoSwitch4-CZ_USBPD!H4: =IF(C4=\"Warning\", \"Ensure that the minimum input voltage is less than the maximum input voltage\", IF(INPUT_TYPE=\"AC\",\"Minimum AC input voltage\",\"Minimum DC input voltage\"))",
+    "InnoSwitch4-CZ_USBPD!H5: =IF(C5=\"Warning\", \"Ensure that the minimum input voltage is less than the maximum input voltage\",IF(C5=\"Info\",\"Input voltage too high: Decrease the maximum input voltage or verify the voltage rating of the input capacito",
+    "InnoSwitch4-CZ_USBPD!H7: =IF(C7=\"Info\",\"AC Input voltage frequency should lie between 47Hz and 63 Hz\",\"AC Input voltage frequency\")",
+    "InnoSwitch4-CZ_USBPD!R10: =IF(INPUT_TYPE=\"DC\", \"PFC INPUT\", IF(AND(VIN_MIN>=N7,VIN_MIN<=O7,VIN_MAX>=P7,VIN_MAX<=Q7),R7,IF(AND(VIN_MIN>=N8,VIN_MIN<=O8,VIN_MAX>=P8,VIN_MAX<=Q8),R8,IF(AND(VIN_MIN>=N9,VIN_MIN<=O9,VIN_MAX>=P9,VIN_MAX<=Q9),R9,R7))))",
+    "InnoSwitch4-CZ_USBPD!C11: =IF(E11<>MAX(E11,E19,E27,E35,E43,E51,E59,E67,E75),\"Info\",IF(VOUT1_CDC>24,\"Warning\",\"\"))",
+    "InnoSwitch4-CZ_USBPD!H11: =IF(C11=\"Info\",\"Enter the highest voltage in SET-POINT 1\",IF(AND(C11=\"Warning\",VOUT1>27),\"The output voltage exceeds the Vout Pin voltage rating. Reduce the output voltage\",IF(AND(C11=\"Warning\",VOUT1>24),\"The output volt",
+    "InnoSwitch4-CZ_USBPD!H13: =IF(C13=\"Info\",\"The output power required exceeds the device capability: Verify thermal performance if no other warnings\",\"Output power 1\")",
+    "InnoSwitch4-CZ_USBPD!H14: =IF(C14=\"Warning\",\"Enter an appropriate converter efficiency between 0 and 1\",\"Converter efficiency for output 1\")",
+    "InnoSwitch4-CZ_USBPD!Z15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch4-CZ_USBPD!AA15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch4-CZ_USBPD!AB15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))",
+    "InnoSwitch4-CZ_USBPD!AC15: =IF(CALCULATE_LPRIMARY_T1_=\"NO\",\"\",VOR*(VOUT_T1_+VF_RECTIFIER)/(VOUT1_CDC+VF_RECTIFIER))"
+   ]
+  },
+  {
+   "file": "ACDC_InnoSwitchCP_Rev1.xlsx",
+   "size": 159398,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 158,
+   "defined_names_nonsimple": 13,
+   "sheets": [
+    {
+     "name": "InnoSwitch",
+     "state": "visible",
+     "dims": "A1:IW919",
+     "formulas": 875
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:IW212",
+     "formulas": 22
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:K103",
+     "formulas": 0
+    },
+    {
+     "name": "Mods",
+     "state": "visible",
+     "dims": "A1:C40",
+     "formulas": 0
+    },
+    {
+     "name": "Calcs",
+     "state": "visible",
+     "dims": "A1:AA169",
+     "formulas": 1571
+    },
+    {
+     "name": "QuickCheck",
+     "state": "visible",
+     "dims": "A1:E28",
+     "formulas": 53
+    }
+   ],
+   "total_formulas": 2521,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 86,
+   "external_ref_cells": 0,
+   "data_validations": 0,
+   "functions": {
+    "IF": 2700,
+    "MAX": 208,
+    "AND": 197,
+    "CEILING": 98,
+    "OR": 52,
+    "VLOOKUP": 52,
+    "FALSE": 49,
+    "MIN": 37,
+    "CONCATENATE": 22,
+    "TRUE": 3,
+    "INT": 3,
+    "LOG": 3,
+    "ISERROR": 2,
+    "PI": 2
+   },
+   "sample_long_formulas": [
+    "InnoSwitch!H3: =IF(C3=\"Warning\",\"Enter a VACMIN between 0-300VAC, ensure VACMIN<VACMAX or verify VMIN\",CONCATENATE(\"Minimum AC Input Voltage. Universal=\",P48,\"VAC to \",Q48,\"VAC. High-Line=\",P49,\"VAC to \",Q49,\"VAC\"))",
+    "InnoSwitch!E5: =IF(AND(RANGE_INPUT=\"Universal\",B5=\"\"),50,IF(AND(RANGE_INPUT=\"High-Line\",B5=\"\"),50,B5))",
+    "InnoSwitch!BV5: =IF(AND(VREVERSE_RECTIFIER_RING>0,VREVERSE_RECTIFIER_RING<=30),30,IF(AND(VREVERSE_RECTIFIER_RING>30,VREVERSE_RECTIFIER_RING<=40),40,IF(AND(VREVERSE_RECTIFIER_RING>40,VREVERSE_RECTIFIER_RING<=60),60,IF(AND(VREVERSE_RECTIF",
+    "InnoSwitch!H6: =IF(C6=\"Warning\",\"Enter the desired output voltage at the end of cable for configuration 1 to continue evaluation\",\"Desired output voltage at the end of cable for configuration 1\")",
+    "InnoSwitch!H7: =IF(C7=\"Warning\",\"Output current cannot be negative or zero. Enter a positive number\",\"Output current for configuration 1\")",
+    "InnoSwitch!H8: =IF(C8=\"Info\",\"Specified output power exceeds the device's capability. Increase device size or verify performance on bench\",\"Continuous output power, including cable drop compensation for configuration 1\")",
+    "InnoSwitch!H9: =IF(C9=\"Warning\",\"Efficiency estimate should be a number between 0 and 1\",\"Efficiency Estimate at output terminals for configuration 1. Use 0.8 if no better data available\")",
+    "InnoSwitch!BV9: =(10^3)*VOLTAGE_BODYDIODE_CONDUCTION_START/(PERCENT_BODYDIODE_CONDUCTION_START*RDSON_DERATING_TEMPERATURE*IS_PEAK)",
+    "InnoSwitch!H10: =IF(C9=\"Warning\",\"Z factor should be a number between 0 and 1\",\"Ratio of secondary side losses to the total losses in the power supply for configuration 1. Use 0.5 if no better data available\")",
+    "InnoSwitch!BV10: =IF(VREVERSE_SRFET=30,BT16,IF(VREVERSE_SRFET=40,BT17,IF(VREVERSE_SRFET=60,INDEX_SRFET_60,IF(VREVERSE_SRFET=80,INDEX_SRFET_80,IF(VREVERSE_SRFET=100,INDEX_SRFET_100,BT52)))))",
+    "InnoSwitch!BZ10: =IF(RDSON_REQUIRED<CB18,BT18,IF(RDSON_REQUIRED>CB32,BT32,1+VLOOKUP(RDSON_REQUIRED,CB18:CH32,7,TRUE())))",
+    "InnoSwitch!CC10: =IF(RDSON_REQUIRED<CB33,BT33,IF(RDSON_REQUIRED>CB36,BT36,1+VLOOKUP(RDSON_REQUIRED,CB33:CH36,7,TRUE())))"
+   ]
+  },
+  {
+   "file": "ACDC_LNK-PL_Buck_Rev1.xlsx",
+   "size": 439083,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 116,
+   "defined_names_nonsimple": 3,
+   "sheets": [
+    {
+     "name": "Link-PL Buck",
+     "state": "visible",
+     "dims": "A1:AJ83",
+     "formulas": 348
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:AD212",
+     "formulas": 33
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:H20",
+     "formulas": 0
+    },
+    {
+     "name": "Half Sine Calculations",
+     "state": "visible",
+     "dims": "A1:AC1359",
+     "formulas": 24429
+    },
+    {
+     "name": "State F On-Time",
+     "state": "visible",
+     "dims": "A1:M1260",
+     "formulas": 0
+    },
+    {
+     "name": "SumSqSin",
+     "state": "visible",
+     "dims": "A1:Z1361",
+     "formulas": 4201
+    },
+    {
+     "name": "Sigma",
+     "state": "visible",
+     "dims": "A1:T130",
+     "formulas": 127
+    }
+   ],
+   "total_formulas": 29138,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 28,
+   "external_ref_cells": 0,
+   "data_validations": 4,
+   "functions": {
+    "IF": 16420,
+    "AND": 10861,
+    "SQRT": 9529,
+    "PI": 6792,
+    "SIN": 6791,
+    "FALSE": 52,
+    "VLOOKUP": 35,
+    "ISNA": 27,
+    "TRUE": 25,
+    "MATCH": 15,
+    "OR": 12,
+    "NOT": 12,
+    "ADDRESS": 10,
+    "CONCATENATE": 9,
+    "SUM": 6,
+    "INDIRECT": 5,
+    "ROUND": 5,
+    "SUMSQ": 4,
+    "CEILING": 2,
+    "FLOOR": 2,
+    "HLOOKUP": 1,
+    "BP": 1
+   },
+   "sample_long_formulas": [
+    "Link-PL Buck!H3: =IF(UNIVERSAL,\"The Universal input configuration will have poor output tolerance. Change to single line\",IF(C3=\"Info\",\"Minimum Voltage outside of spec. Value overwritten\",\"Minimum AC Input Voltage\"))",
+    "Link-PL Buck!H5: =IF(UNIVERSAL,\"The Universal input configuration will have poor output tolerance. Change to single line\",IF(C5=\"Info\",\"Maximum AC Voltage outside of spec. Value overwritten\",\"Maximum AC Input Voltage\"))",
+    "Link-PL Buck!H6: =IF(C6=\"Info\",\"Line Frequency outside of spec. Value overwritten\",\"AC Mains Frequency. (between 47Hz and 63Hz)\")",
+    "Link-PL Buck!H7: =IF(C7=\"Info\",\"Minimum value cannot be higher than typical value\",\"Minimum Output Voltage of LED string\")",
+    "Link-PL Buck!H9: =IF(C9=\"\",\"Maximum Output  Voltage of LED string\",IF(C9=\"Warning\",\"Output Voltage is too high\",\"Maximum value cannot be lower than typical value\"))",
+    "Link-PL Buck!R13: =ILIMMAX+(SQRT(2)*VACMAX*0.0000001)/(LPMIN/1000000)-VLOOKUP(DEVICE,COMPONENT_TABLE,9,FALSE())*1000*0.0000001",
+    "Link-PL Buck!N22: =SQRT(Etotal/((1/(2*LP_SI))*(VACMIN^2*2*SUM_SINSQ_FL_FULL_FS-2*SQRT(2)*VACMIN*SUM_SIN_FL_FULL_FS*VO+VO^2)+(SQRT(2)*VACMIN*SUM_SIN_FL_FULL_FS-VO)*VO/(2*LP_SI)))",
+    "Link-PL Buck!S22: =SQRT(Etotal/((1/(2*LP_SI))*(VACMAX^2*2*SUM_SINSQ_FL_FULL_FS-2*SQRT(2)*VACMAX*SUM_SIN_FL_FULL_FS*VO+VO^2)+(SQRT(2)*VACMAX*SUM_SIN_FL_FULL_FS-VO)*VO/(2*LP_SI)))",
+    "Link-PL Buck!H23: =IF(C23=\"\",\"Expected switching  frequency at low line and PO\",IF(STATE_FINAL<STATE_LOW_LIMIT,\"Device operating below minimum recommeded frequency at VACMIN. Increase the inductance value\",\"Device operating below minimum ",
+    "Link-PL Buck!H24: =IF(STATE_HIGH,\"Duty Cycle close to the absolute maximum. Consider reducing the Inductance Value, or change your output characteristic\",\"Expected operating duty cycle at low line and PO\")",
+    "Link-PL Buck!H26: =IF(C26=\"\",\"Worst case peak primary current at VO\",\"Current limit reached, preventing IC from operating at required duty cycle. This may result in degraded power factor. Please verify on bench.\")",
+    "Link-PL Buck!H27: =IF(C27=\"\",\"Worst case ratio between off-time of switch and reset time of core\",\"LinkSwitch-PL must operate in discontinuous mode (KP > 1) for good power factor. Consider reducing the primary inductance.\")"
+   ]
+  },
+  {
+   "file": "ACDC_LYTSwitch5_Buck_Rev2.xlsx",
+   "size": 150286,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 225,
+   "defined_names_nonsimple": 0,
+   "sheets": [
+    {
+     "name": "LYT5_Buck",
+     "state": "visible",
+     "dims": "A1:BB130",
+     "formulas": 538
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:A1",
+     "formulas": 0
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:G30",
+     "formulas": 0
+    },
+    {
+     "name": "State Calculations",
+     "state": "visible",
+     "dims": "A1:AG1027",
+     "formulas": 2371
+    },
+    {
+     "name": "Change Logs",
+     "state": "visible",
+     "dims": "A1:E34",
+     "formulas": 0
+    },
+    {
+     "name": "Change Logs_2",
+     "state": "visible",
+     "dims": "A1:A1",
+     "formulas": 0
+    },
+    {
+     "name": "Input Mapping",
+     "state": "visible",
+     "dims": "A1:A104",
+     "formulas": 0
+    }
+   ],
+   "total_formulas": 2909,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 15,
+   "external_ref_cells": 0,
+   "data_validations": 1,
+   "functions": {
+    "IF": 980,
+    "AND": 331,
+    "PI": 330,
+    "ASIN": 228,
+    "VLOOKUP": 71,
+    "LOG": 63,
+    "TRUE": 56,
+    "SIN": 46,
+    "INT": 32,
+    "LP": 24,
+    "COS": 19,
+    "OR": 18,
+    "ROUND": 18,
+    "MAX": 13,
+    "FALSE": 13,
+    "CONCATENATE": 12,
+    "ABS": 12,
+    "ROUNDUP": 9,
+    "SQRT": 7,
+    "MIN": 5,
+    "MATCH": 3,
+    "CEILING": 3,
+    "MID": 2,
+    "INDEX": 2,
+    "DCM": 1,
+    "BP": 1
+   },
+   "sample_long_formulas": [
+    "LYT5_Buck!H3: =IF(AND(C3=\"Info\",VACMIN<85),\"The minimum AC line voltage should be greater than 85VAC to ensure correct device operation.\",IF(AND(C3=\"Info\",VACMIN>=VACNOM,VACMIN<=VACMAX),CONCATENATE(\"The minimum AC line voltage should ",
+    "LYT5_Buck!C5: =IF(VACMAX<VACNOM,\"Info\",IF(VACMAX-VACMIN>80,\"Info1\",IF(VACMAX>308,\"Warning\",\"\")))",
+    "LYT5_Buck!H5: =IF(VACMAX<VACNOM,CONCATENATE(\"VACMAX should be greater than \",VACNOM,\"VAC.\"),IF(AND(C5=\"Info1\",C29=\"Info\"),\"THD performance at VACMIN is not guaranteed. Please verify in the bench. Decrease VACMIN or VACNOM or Decrease ",
+    "LYT5_Buck!H6: =IF(C6=\"Warning\",\"AC line frequency should lie between 47 and 63Hz.\",\"AC line frequency.\")",
+    "LYT5_Buck!C8: =IF(VO>=VACMIN_PK,\"Warning\",IF(DUTY_VIA_KDP<4%,\"Warning\",IF('State Calculations'!V20>1005,\"Info\",IF(DUTY_VIA_KDP-4%<0.01,\"Info\",\"\"))))",
+    "LYT5_Buck!H8: =IF(AND(C8=\"Warning\",(VO<=VACMIN_PK)),\"VO too low, duty cycle is out of range at VACMAX. Regulation is NOT GUARANTEED.\",IF(AND(C8=\"Warning\",VACMIN_PK*0.9<VO),\"Warning!!!Output Voltage should be LESS THAN VACmin.\",IF(AND(",
+    "LYT5_Buck!N8: =IF(1000*IP_MOSFET<=AD7,AL7,IF(1000*IP_MOSFET>=AD9,AL9,1+VLOOKUP(1000*IP_MOSFET,AD7:AL9,9,TRUE())))",
+    "LYT5_Buck!H9: =IF(C9=\"Warning\",\"OVP will trigger in normal operation. Please change ROC.\",IF(C9=\"Info\",\"Minimum OVP threshold is close to normal operating voltage. Verify performance on bench.\",\"Minimum Voltage at which output voltage",
+    "LYT5_Buck!N9: =IF(OR(DEVICE_USER=\"Auto\",DEVICE_USER=\"\"),VLOOKUP(MAX(N7:N8),Z7:AA9,2,FALSE()),DEVICE_USER)",
+    "LYT5_Buck!H11: =IF(C11=\"Warning\",\"Please enter a value for effiency between 0 and 1.\",\"Total power supply efficiency.\")",
+    "LYT5_Buck!H12: =IF(C12=\"Warning\",\"Please enter a value for Z between 0 and 1.\",\"Loss allocation factor.\")",
+    "LYT5_Buck!H13: =IF(C13=\"Info\",CONCATENATE(\"The selected device's maximum output power capability (\",DEVICE_MAX_POWER,\"W) has been exceeded. Pick a larger device or verify thermal performance on the bench.\"),\"Output power.\")"
+   ]
+  },
+  {
+   "file": "ACDC_LYTSwitch-4_Flyback_Rev1.xlsx",
+   "size": 1726023,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 161,
+   "defined_names_nonsimple": 6,
+   "sheets": [
+    {
+     "name": "LYTSwitch Flyback",
+     "state": "visible",
+     "dims": "A1:IW143",
+     "formulas": 625
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:AD212",
+     "formulas": 39
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:H56",
+     "formulas": 11
+    },
+    {
+     "name": "Calcs",
+     "state": "visible",
+     "dims": "A1:AV1332",
+     "formulas": 62112
+    },
+    {
+     "name": "Calcs 2",
+     "state": "visible",
+     "dims": "A1:K472",
+     "formulas": 18
+    },
+    {
+     "name": "Calcs4",
+     "state": "visible",
+     "dims": "A1:AT2699",
+     "formulas": 58230
+    }
+   ],
+   "total_formulas": 121035,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 2676,
+   "external_ref_cells": 0,
+   "data_validations": 3,
+   "functions": {
+    "SIN": 26420,
+    "COS": 21136,
+    "IF": 11190,
+    "SQRT": 5326,
+    "CONCATENATE": 2647,
+    "ABS": 2645,
+    "INDIRECT": 2642,
+    "VLOOKUP": 37,
+    "SUM": 35,
+    "FALSE": 33,
+    "OR": 27,
+    "PI": 17,
+    "AND": 15,
+    "MAX": 8,
+    "AVERAGE": 8,
+    "INT": 6,
+    "TRUE": 4,
+    "LOG": 3,
+    "MIN": 2,
+    "FLOOR": 2,
+    "ATAN": 2,
+    "L": 2,
+    "MID": 1,
+    "VACNOM": 1,
+    "VMIN": 1,
+    "CMA": 1,
+    "INCREASE": 1,
+    "ROUNDUP": 1
+   },
+   "sample_long_formulas": [
+    "LYTSwitch Flyback!H5: =IF(C5=\"\",\"Maximum AC input voltage\",\"!!! Warning. VACMAX cannot be greater that 150 VAC\")",
+    "LYTSwitch Flyback!H7: =IF(VO<0,\"!!! Info - Enter negative output as a positive value.\",\"Typical output voltage of LED string at full load\")",
+    "LYTSwitch Flyback!H8: =IF(C8=\"\",\"Maximum expected LED string Voltage.\",IF(C8=\"Info\",\"IFB is close to, or larger than IFB max. VO_max has been automatically overwritten. If this value is not acceptable change IFB\",\"!!! Warning. VO_MAX cannot b",
+    "LYTSwitch Flyback!E10: =IF(B10>VOVP_MAX,MAX(VO_MAX*1.1,VO*IFB_MAX/IFB),IF(B10=\"\",MIN(VO_MAX*1.1,VO*IFB_MAX/IFB),B10))",
+    "LYTSwitch Flyback!H10: =IF(C10=\"\",\"Over-voltage protection setpoint\",CONCATENATE(\"!!! Warning. Over-voltage setpoint is too high. Device will automatically set output to \",VOVP_MAX,\" V\"))",
+    "LYTSwitch Flyback!H18: =IF(C18=\"Info\",\"Select the correct LYTSwitch from the drop-down box\",IF(PO<X44,\"!!! Warning. Selected LYTSwitch-4 is too large for this power level. Select smaller device\",IF(PO>X43,\"!!! Warning. Selected LYTSwitch-4 is ",
+    "LYTSwitch Flyback!E21: =IF(config=\"RED\",VLOOKUP(LYTSwitch,LYT_DEVICE_TABLE,5,FALSE()),VLOOKUP(LYTSwitch,LYT_DEVICE_TABLE,2,FALSE()))",
+    "LYTSwitch Flyback!E22: =IF(config=\"RED\",VLOOKUP(LYTSwitch,LYT_DEVICE_TABLE,7,FALSE()),VLOOKUP(LYTSwitch,LYT_DEVICE_TABLE,4,FALSE()))",
+    "LYTSwitch Flyback!H29: =IF(IFB<85,\"!!! Warning. IFB is too low. Increase VOR or use smaller device and ensure that IFB > 85 uA\",IF(IFB>210,\"!!! Warning. IFB is too high. Decrease VOR or use larger device and ensure that IFB < 210 uA\",\"FB pin c",
+    "LYTSwitch Flyback!L35: =IF(config=\"RED\",VLOOKUP(LYTSwitch,LYT_DEVICE_TABLE,21,FALSE()),VLOOKUP(LYTSwitch,LYT_DEVICE_TABLE,22,FALSE()))",
+    "LYTSwitch Flyback!H37: =IF(C37=\"\",\"Ripple to Peak Current Ratio (For PF > 0.9, 0.4 < KP <  0.9)\",\"!!! Warning. KP is too high. Decrease KP\")",
+    "LYTSwitch Flyback!H40: =IF(C40=\"\",\"Expected Average Output Current\",CONCATENATE(\"Expected Average Output current is outside 5% tolerance band. Change IFB to \",IFB_REC,\" for better current regulation set-point\"))"
+   ]
+  },
+  {
+   "file": "ACDC_LinkSwitchTN2_Buck_Rev1.xlsx",
+   "size": 38479,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 81,
+   "defined_names_nonsimple": 1,
+   "sheets": [
+    {
+     "name": "LinkSwitchTN2",
+     "state": "visible",
+     "dims": "A1:FK115",
+     "formulas": 296
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:AB24",
+     "formulas": 0
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:H11",
+     "formulas": 0
+    }
+   ],
+   "total_formulas": 296,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 0,
+   "external_ref_cells": 0,
+   "data_validations": 0,
+   "functions": {
+    "IF": 253,
+    "FALSE": 23,
+    "VLOOKUP": 21,
+    "AND": 20,
+    "INT": 16,
+    "LOG": 16,
+    "SQRT": 13,
+    "OR": 8,
+    "ROUND": 8,
+    "PI": 6,
+    "HLOOKUP": 4,
+    "TRUE": 2,
+    "MID": 2,
+    "H": 1,
+    "CONCATENATE": 1
+   },
+   "sample_long_formulas": [
+    "LinkSwitchTN2!H6: =IF(C6=\"Info\",\"The maximum AC line voltage is too high\",\"Maximum AC line voltage\")",
+    "LinkSwitchTN2!H10: =IF(C10=\"Warning\",\"The output voltage cannot be zero or negative; enter a positive output voltage and use the multi output section of the spreadsheet to define a negative output voltage\",\"Output voltage\")",
+    "LinkSwitchTN2!H11: =IF(C11=\"Info\",\"Device operation is too continuous, verify power delivery on the bench or select a larger device\",IF(C11=\"Warning\",\"The device output current or device current limit capability has been exceeded, pick the",
+    "LinkSwitchTN2!H12: =IF(C12=\"Warning\",\"Efficiency should lie between (0,1)\",\"Efficiency estimate at output terminals\")",
+    "LinkSwitchTN2!E15: =IF(B15<>\"\",B15,IF(capacitance_per_watt*POUT<=AR13,AR13,IF(capacitance_per_watt*POUT>=BI13,BI13,HLOOKUP(1+HLOOKUP(capacitance_per_watt*POUT,AR13:BI14,2,TRUE()),AR12:BI13,2,FALSE()))))",
+    "LinkSwitchTN2!O15: =IF(RANGE_LINE=\"High Line\",IF(AND(IOUT>0,IOUT<=O7),N7,IF(AND(IOUT>O7,IOUT<=O8),N8,IF(AND(IOUT>O8,IOUT<=O9),N9,N10))),IF(AND(IOUT>0,IOUT<=Q7),N7,IF(AND(IOUT>Q7,IOUT<=Q8),N8,IF(AND(IOUT>Q8,IOUT<=Q9),N9,N10))))",
+    "LinkSwitchTN2!O18: =IF(RANGE_LINE=\"High Line\",VLOOKUP(N18,N7:O10,2,FALSE()),VLOOKUP(N18,N7:Q10,4,FALSE()))",
+    "LinkSwitchTN2!P18: =IF(RANGE_LINE=\"High Line\",VLOOKUP(N18,N7:P10,3,FALSE()),VLOOKUP(N18,N7:R10,5,FALSE()))",
+    "LinkSwitchTN2!Q18: =IF(MODE_CURRENTLIMIT=\"RED\",VLOOKUP(N18,N7:S10,6,FALSE()),VLOOKUP(N18,N7:AA10,14,FALSE()))",
+    "LinkSwitchTN2!R18: =IF(MODE_CURRENTLIMIT=\"RED\",VLOOKUP(N18,N7:T10,7,FALSE()),VLOOKUP(N18,N7:AB10,15,FALSE()))",
+    "LinkSwitchTN2!S18: =IF(MODE_CURRENTLIMIT=\"RED\",VLOOKUP(N18,N7:U10,8,FALSE()),VLOOKUP(N18,N7:AC10,16,FALSE()))",
+    "LinkSwitchTN2!T18: =IF(MODE_CURRENTLIMIT=\"RED\",VLOOKUP(N18,N7:V10,9,FALSE()),VLOOKUP(N18,N7:AD10,17,FALSE()))"
+   ]
+  },
+  {
+   "file": "ACDC_TNY-4_Rev1.xlsx",
+   "size": 162800,
+   "has_vba": false,
+   "external_links": 1,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": true,
+   "defined_names": 180,
+   "defined_names_nonsimple": 34,
+   "sheets": [
+    {
+     "name": "TinySwitch-4",
+     "state": "visible",
+     "dims": "A1:IW928",
+     "formulas": 669
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:AD213",
+     "formulas": 51
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:H43",
+     "formulas": 0
+    },
+    {
+     "name": "Charts Data",
+     "state": "visible",
+     "dims": "A1:G69",
+     "formulas": 168
+    },
+    {
+     "name": "Diode List",
+     "state": "visible",
+     "dims": "A1:X109",
+     "formulas": 210
+    },
+    {
+     "name": "Ton Correction",
+     "state": "visible",
+     "dims": "A1:AB126",
+     "formulas": 1569
+    }
+   ],
+   "total_formulas": 2667,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 160,
+   "external_ref_cells": 0,
+   "data_validations": 3,
+   "functions": {
+    "IF": 1505,
+    "SQRT": 114,
+    "EXP": 108,
+    "VLOOKUP": 58,
+    "FALSE": 48,
+    "INT": 16,
+    "MAX": 6,
+    "LOG": 6,
+    "FLOOR": 6,
+    "CEILING": 6,
+    "CONCATENATE": 5,
+    "OR": 5,
+    "ABS": 4,
+    "TRUE": 4,
+    "AND": 3,
+    "MIN": 3,
+    "L": 2
+   },
+   "sample_long_formulas": [
+    "TinySwitch-4!H6: =IF(VO<0,\"!!! Info - Enter negative output as a positive value. To indicate negative output enter 1 in cell B141\",\"Output Voltage (at continuous power)\")",
+    "TinySwitch-4!H8: =IF(C8=\"Warning\",\"!!! Warning. Specified Output Power exceeds the maximum capability of the chosen device in the chosen configuration. Choose larger device or current limit configuration.\",IF(C8=\"Info\",\"Minimum output po",
+    "TinySwitch-4!H12: =IF(AND(VACMIN>=132,CIN<PO),\"!!! Increase CIN. Ensure that CIN is atleast 1uF/Watt\",IF(C12=\"Info\",CONCATENATE(\"!!! Input capacitor is too small. Recommnded to increase CIN above \",CMIN,\" uF to ensure VMIN>70 V\"),\"Input C",
+    "TinySwitch-4!H16: =IF(OR(B16=\"Auto\",B16=\"\"),\"Recommended TinySwitch-4\",\"User-defined TinySwitch-4\")",
+    "TinySwitch-4!E18: =IF(Config=\"RED\",\"Reduced Current Limit\",IF(Config=\"STD\",\"Standard Current Limit\",\"Increased Current Limit\"))",
+    "TinySwitch-4!E19: =IF(Config=\"RED\",VLOOKUP(TinySwitch_4,TinySwitch_4_Table,2,FALSE()),IF(Config=\"STD\",VLOOKUP(TinySwitch_4,TinySwitch_4_Table,5,FALSE()),VLOOKUP(TinySwitch_4,TinySwitch_4_Table,8,FALSE())))",
+    "TinySwitch-4!E20: =IF(Config=\"RED\",VLOOKUP(TinySwitch_4,TinySwitch_4_Table,3,FALSE()),IF(Config=\"STD\",VLOOKUP(TinySwitch_4,TinySwitch_4_Table,6,FALSE()),VLOOKUP(TinySwitch_4,TinySwitch_4_Table,9,FALSE())))",
+    "TinySwitch-4!E21: =IF(Config=\"RED\",VLOOKUP(TinySwitch_4,TinySwitch_4_Table,4,FALSE()),IF(Config=\"STD\",VLOOKUP(TinySwitch_4,TinySwitch_4_Table,7,FALSE()),VLOOKUP(TinySwitch_4,TinySwitch_4_Table,10,FALSE())))",
+    "TinySwitch-4!H28: =IF(L60<0.25,\"!!! Warning. Transient KP will be below 0.25. Increase VOR or Increase VMIN or Use Larger device\",\"Transient Ripple to Peak Current Ratio. Ensure KP_TRANSIENT > 0.25\")",
+    "TinySwitch-4!K31: =ILIMITMAX-VLOOKUP(TinySwitch_4,TinySwitch_4_Table,27,FALSE())*(TILD/1000000000)+VMAX*(TILD/1000000000)/(lp/1000000)",
+    "TinySwitch-4!K33: =IF(KP_INITIAL<1,1000000*PO*(((Z*(1-n))+n)/n)/((ILIMITMIN^2)*KP_INITIAL*(1-KP_INITIAL/2)*F_ILIMMIN),1000000*PO*(((Z*(1-n))+n)/n)/((ILIMITMIN^2)*(1/2)*F_ILIMMIN))",
+    "TinySwitch-4!O36: =IF(PACKAGE=\"P\",IF(Config=\"RED\",0.9,IF(Config=\"STD\",0.9,0.9)),IF(Config=\"RED\",0.9,IF(Config=\"STD\",0.9,0.9)))"
+   ]
+  },
+  {
+   "file": "ACDC_TOPJX_Flb_Rev1.xlsx",
+   "size": 90670,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 253,
+   "defined_names_nonsimple": 5,
+   "sheets": [
+    {
+     "name": "JX_Flyback",
+     "state": "visible",
+     "dims": "A1:IW181",
+     "formulas": 1005
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:AD212",
+     "formulas": 51
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:J51",
+     "formulas": 4
+    }
+   ],
+   "total_formulas": 1060,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 2,
+   "external_ref_cells": 0,
+   "data_validations": 5,
+   "functions": {
+    "IF": 559,
+    "CONCATENATE": 61,
+    "INT": 39,
+    "LOG": 34,
+    "VLOOKUP": 33,
+    "FALSE": 30,
+    "AND": 16,
+    "OR": 5,
+    "ROUND": 5,
+    "W": 4,
+    "TRUE": 3,
+    "SQRT": 2,
+    "L": 2,
+    "TEXT": 1,
+    "FIXED": 1,
+    "CIN": 1,
+    "MID": 1,
+    "LEN": 1,
+    "VMIN": 1,
+    "ROUNDUP": 1
+   },
+   "sample_long_formulas": [
+    "JX_Flyback!H6: =IF(VO<0,\"!!! Info - Enter negative output as a positive value. To indicate negative output enter 1 in cell B159\",\"Output Voltage (main)\")",
+    "JX_Flyback!H7: =IF(AND(VMIN<SINGLE_V,PO_AVG>CONT_PMAX_DEVICE_SEL),CONCATENATE(\"!!! For low line (VMIN < \",SINGLE_V,\" VDC) designs: Reduce PO_AVG<\",CONT_PMAX_DEVICE_SEL,\" W (or use larger device)\"),IF(AND(VMIN>SINGLE_V,PO_AVG>CONT_PMAX_",
+    "JX_Flyback!H8: =IF(AND(VMIN<200,PO_PEAK>PK_PMAX_DEVICE_SEL),CONCATENATE(\"!!! Peak Output Power is too great! PO_PEAK<\",PK_PMAX_DEVICE_SEL,\" W (Or choose a larger device)\"),IF(AND(VMIN>200,PO_PEAK>PK_PMAX_DEVICE_SEL),CONCATENATE(\"!!! Pe",
+    "JX_Flyback!E9: =IF(DEVICE_PKG_SEL=E_PKG,EXT_HEATSINK,IF(DEVICE_PKG_SEL=K_PKG,PCB_HEATSINK,HEATSINK_INPUT))",
+    "JX_Flyback!H9: =IF(HEATSINK_INPUT<>HEATSINK,\"!!! Heatsink chosen is not comaptible with device package chosen !!! Please select a different heatsink type.\",\"Heatsink Type\")",
+    "JX_Flyback!H13: =IF(VB<VBIAS_MIN,\"Ensure proper operation at no load.\",CONCATENATE(\"Bias Voltage - Verify that VB is > \",VBIAS_MIN_BENCH,\" V at no load and VMAX\"))",
+    "JX_Flyback!H15: =IF(VMIN_UNDER_ROOT<0,CONCATENATE(\"!!! Use an input filter capacitor of at least \",ROUND(CMIN,0),\" uF to maintain a minimum DC bus voltage of \",DC_BUS_MIN,\" V.\"),\"Input Filter Capacitor\")",
+    "JX_Flyback!H20: =CONCATENATE(IF(AND(ENCLOSURE=OF_ENC,HEATSINK=PCB_HEATSINK),PMAX_PCB_230_OF_SEL,IF(AND(ENCLOSURE=OF_ENC,HEATSINK=EXT_HEATSINK),PMAX_EXT_230_OF_SEL,IF(AND(ENCLOSURE=ADP_ENC,HEATSINK=PCB_HEATSINK),PMAX_PCB_230_ADPT_SEL,PMA",
+    "JX_Flyback!H21: =IF(C21=\"\",\"External Ilimit reduction factor (KI=1.0 for default ILIMIT, KI <1.0 for lower ILIMIT)\",\"!!! Warning Not recommended to lower current limit to below 25%. Use smaller device\")",
+    "JX_Flyback!H26: =IF(fS<fSmin,\"!!! Warning : fs < fsmin\",\"TOPSwitch-JX Minimum Switching Frequency\")",
+    "JX_Flyback!H27: =IF(fS>fSmax,\"!!! Warning : fs > fsmax)\",\"TOPSwitch-JX Maximum Switching Frequency\")",
+    "JX_Flyback!AQ27: =IF(fS<80000,VLOOKUP(PO_AVG,AO5:AR22,3,TRUE())+1,VLOOKUP(PO_AVG,AP5:AR22,2,TRUE())+1)"
+   ]
+  },
+  {
+   "file": "DCDC_DPAFwd_Rev2.xlsx",
+   "size": 196340,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 192,
+   "defined_names_nonsimple": 1,
+   "sheets": [
+    {
+     "name": "DCDC_2_20",
+     "state": "visible",
+     "dims": "A1:IW282",
+     "formulas": 1263
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:IW212",
+     "formulas": 62
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:H371",
+     "formulas": 0
+    }
+   ],
+   "total_formulas": 1325,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 3,
+   "external_ref_cells": 0,
+   "data_validations": 0,
+   "functions": {
+    "IF": 780,
+    "INT": 91,
+    "VLOOKUP": 56,
+    "FALSE": 50,
+    "CONCATENATE": 11,
+    "SQRT": 9,
+    "AND": 7,
+    "TRUE": 6,
+    "MAX": 5,
+    "OR": 4,
+    "ABS": 4,
+    "LOG": 3,
+    "PI": 3,
+    "COS": 1,
+    "SIN": 1
+   },
+   "sample_long_formulas": [
+    "DCDC_2_20!H5: =IF(C5=\"\",\"Output2 voltage\",\"!!! VOUT2 is less than VMAIN: Lowest output must be MAIN\")",
+    "DCDC_2_20!C7: =IF(PO=0,\"\",IF(PO>(VMIN-16)*(VLOOKUP(DPASwitch,DPAlist,6,FALSE())-VLOOKUP(DPASwitch,DPAlist,5,FALSE()))/(36-16)+VLOOKUP(DPASwitch,DPAlist,5,FALSE()),\"Warning\",IF(PACKAGE=\"R\",\"\",IF(PACKAGE=\"S\",\"\",\"Comment\"))))",
+    "DCDC_2_20!H7: =IF(C7=\"Comment\",\"Verify temperature rise for continuous power. P and G packages may be thermally limited\",IF(C7=\"\",\"Total output power\",\"!!! Exceeds max power for DPA-Switch: increase DPA-Switch size, decrease PO\"))",
+    "DCDC_2_20!H8: =IF(C8=\"\",\"DC bias voltage from output inductor winding\",IF(VBIAS<12,\"!!! Bias must be > 12V to maintain regulation: increase VBIAS\",\"!!! Bias must be < 18V to minimize optocoupler dissipation: decrease VBIAS\"))",
+    "DCDC_2_20!H11: =IF(C11=\"\",\"Minimum DC input voltage\",\"!!! Input voltage < minimum allowed: increase VMIN\")",
+    "DCDC_2_20!E17: =IF(B16=\"\",(VUVOFF_MIN-VL)*iOVOFF_MAX/iUVOFF_MIN+VL,(C16-VL)*iOVOFF_MAX/iOVON_MIN+VL)",
+    "DCDC_2_20!H24: =IF(C24=\"\",(IF(B24=\"L\",\"Low (L) frequency option - 300kHz\",\"Full (F) frequency option - 400kHz\")),\"!!! Warning - Must choose either (F) or (L) option - default Full (F)\")",
+    "DCDC_2_20!H26: =IF(C26=\"\",\"External Ilimit reduction factor (KI=1.0 for default ILIMIT, KI <1.0 for lower ILIMIT)\",IF(KI<0.3,\"!!! Increase to within device limits (0.3 < KI < 1.0)\",\"!!! Decrease to within device limits (0.3 < KI < 1.0)",
+    "DCDC_2_20!H27: =IF(KI<1,\"External current limit.  Use 1% resistor to set current limit\",\"External current limit\")",
+    "DCDC_2_20!BC27: =IF(AND(AZ27=\"\",AZ28=\"\"),1+INT(9.97*(1.8277-(2*LOG(1000*(SQRT(4*rHO*MLT*NMAIN/(BC26*PI()))))))),IF(AZ28=\"\",AZ27,\"-\"))",
+    "DCDC_2_20!H30: =IF(C30=\"\",\"Maximum allowed duty cycle at VUV ON MIN undervoltage threshold\",CONCATENATE(\"!!! Duty cycle is greater than DPA-Switch maximum duty cycle (\",DLMIN,\")\"))",
+    "DCDC_2_20!H31: =IF(C31=\"\",\"Maximum current ripple factor\",IF(KDI<0.14,\"!!! Increase to within application limits (0.14 < KI < 0.20)\",\"!!! Decrease to within application limits (0.14 < KDI < 0.20)\"))"
+   ]
+  },
+  {
+   "file": "HiperPFS3_Boost_Rev1.xlsx",
+   "size": 458564,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": true,
+   "defined_names": 303,
+   "defined_names_nonsimple": 3,
+   "sheets": [
+    {
+     "name": "HiperPFS3",
+     "state": "visible",
+     "dims": "A1:CR194",
+     "formulas": 934
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:AD212",
+     "formulas": 4
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:O44",
+     "formulas": 52
+    },
+    {
+     "name": "Charts Data",
+     "state": "visible",
+     "dims": "A1:I102",
+     "formulas": 724
+    },
+    {
+     "name": "Choke Construction",
+     "state": "visible",
+     "dims": "A1:CZ196",
+     "formulas": 1064
+    },
+    {
+     "name": "powder turns",
+     "state": "visible",
+     "dims": "A1:AE128",
+     "formulas": 857
+    },
+    {
+     "name": "Calcs1",
+     "state": "visible",
+     "dims": "A1:IW117",
+     "formulas": 4195
+    },
+    {
+     "name": "Calcs2 (powder sim)",
+     "state": "visible",
+     "dims": "A1:IW117",
+     "formulas": 5378
+    },
+    {
+     "name": "Changelog_OLD",
+     "state": "visible",
+     "dims": "A1:B133",
+     "formulas": 0
+    },
+    {
+     "name": "Compatibility Report",
+     "state": "visible",
+     "dims": "A1:F24",
+     "formulas": 0
+    },
+    {
+     "name": "Changelog",
+     "state": "visible",
+     "dims": "A1:G23",
+     "formulas": 0
+    }
+   ],
+   "total_formulas": 13208,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 816,
+   "external_ref_cells": 0,
+   "data_validations": 10,
+   "functions": {
+    "IF": 5177,
+    "COSH": 1080,
+    "COS": 1080,
+    "SIN": 900,
+    "SQRT": 850,
+    "SINH": 720,
+    "MIN": 478,
+    "AND": 419,
+    "MAX": 416,
+    "PI": 215,
+    "INDEX": 176,
+    "AVERAGE": 133,
+    "VLOOKUP": 127,
+    "FALSE": 104,
+    "OR": 36,
+    "TRUE": 20,
+    "SUM": 11,
+    "ROUND": 10,
+    "INT": 8,
+    "LOG": 8,
+    "MID": 7,
+    "ROUNDUP": 4,
+    "FLOOR": 3,
+    "ABS": 2,
+    "CONCATENATE": 1,
+    "DCR": 1,
+    "BP": 1,
+    "TARGET": 1,
+    "VALUE": 1,
+    "CEILING": 1
+   },
+   "sample_long_formulas": [
+    "HiperPFS3!C3: =IF(AND(MID(HiperPFS3,6,1)=\"2\",Range=\"Universal\"),\"\",IF(AND(MID(HiperPFS3,6,1)=\"3\",Range=\"High Line\"),\"\",\"Warning\"))",
+    "HiperPFS3!H3: =IF(C3=\"Warning\",\"Select the appropriate device based on the input voltage range\",\"Input voltage range\")",
+    "HiperPFS3!M3: =IF(Range=\"Universal\",IF(PO<$AK$5,1,IF(PO>$AK$11,\"Overflow\",(VLOOKUP(PO,$AK$5:$AO$11,4,TRUE()))+1)),IF(PO<$AK$5,1,IF(PO>$AK$11,\"Overflow\",(VLOOKUP(PO,$AK$5:$AO$11,4,TRUE()))+1)))",
+    "HiperPFS3!H4: =IF(C4=\"\",\"Minimum AC input voltage. Spreadsheet simulation is performed at this voltage.  To examine operation at other votlages, enter here, but enter fixed value for LPFC_ACTUAL.\",\"!!!Info. Minimum input voltage shoul",
+    "HiperPFS3!M4: =IF(Range=\"Universal\",IF(IPK_CALC<$AA$5,1,IF(IPK_CALC>$AA$11,\"Overflow\",(VLOOKUP(IPK_CALC,$AA$5:$AO$11,14,TRUE()))+1)),IF(IPK_CALC<$AB$5,1,IF(IPK_CALC>$AB$11,\"Overflow\",(VLOOKUP(IPK_CALC,$AB$5:$AO$11,13,TRUE()))+1)))",
+    "HiperPFS3!H5: =IF(C5=\"\",\"Maximum AC input voltage\",IF(C5=\"Info\",\"Maximum line voltage is higher than typical line conditions\",\"!!! Warning VACMAX cannot be lower than VACMIN\"))",
+    "HiperPFS3!Z5: =IF(AND(Range=\"Universal\",MODE=\"EFFICIENCY\"),Z12,IF(AND(Range=\"Universal\",MODE=\"Full Power\"),Z19,IF(AND(Range=\"High Line\",MODE=\"EFFICIENCY\"),Z26,Z33)))",
+    "HiperPFS3!AA5: =IF(AND(Range=\"Universal\",MODE=\"EFFICIENCY\"),AA12,IF(AND(Range=\"Universal\",MODE=\"Full Power\"),AA19,IF(AND(Range=\"High Line\",MODE=\"EFFICIENCY\"),AA26,AA33)))",
+    "HiperPFS3!AB5: =IF(AND(Range=\"Universal\",MODE=\"EFFICIENCY\"),AB12,IF(AND(Range=\"Universal\",MODE=\"Full Power\"),AB19,IF(AND(Range=\"High Line\",MODE=\"EFFICIENCY\"),AB26,AB33)))",
+    "HiperPFS3!AC5: =IF(AND(Range=\"Universal\",MODE=\"EFFICIENCY\"),AC12,IF(AND(Range=\"Universal\",MODE=\"Full Power\"),AC19,IF(AND(Range=\"High Line\",MODE=\"EFFICIENCY\"),AC26,AC33)))",
+    "HiperPFS3!AD5: =IF(AND(Range=\"Universal\",MODE=\"EFFICIENCY\"),AD12,IF(AND(Range=\"Universal\",MODE=\"Full Power\"),AD19,IF(AND(Range=\"High Line\",MODE=\"EFFICIENCY\"),AD26,AD33)))",
+    "HiperPFS3!AE5: =IF(AND(Range=\"Universal\",MODE=\"EFFICIENCY\"),AE12,IF(AND(Range=\"Universal\",MODE=\"Full Power\"),AE19,IF(AND(Range=\"High Line\",MODE=\"EFFICIENCY\"),AE26,AE33)))"
+   ]
+  },
+  {
+   "file": "LinkSwitch-TN_Rev2.xlsx",
+   "size": 28338,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 89,
+   "defined_names_nonsimple": 3,
+   "sheets": [
+    {
+     "name": "Sheet1",
+     "state": "visible",
+     "dims": "A1:IW86",
+     "formulas": 276
+    },
+    {
+     "name": "Sheet2",
+     "state": "visible",
+     "dims": "A1:AD193",
+     "formulas": 10
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:F10",
+     "formulas": 0
+    }
+   ],
+   "total_formulas": 286,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 9,
+   "external_ref_cells": 0,
+   "data_validations": 0,
+   "functions": {
+    "IF": 242,
+    "VLOOKUP": 18,
+    "FALSE": 16,
+    "SQRT": 4,
+    "CONCATENATE": 2,
+    "INT": 2,
+    "ABS": 1,
+    "OR": 1,
+    "TRUE": 1
+   },
+   "sample_long_formulas": [
+    "Sheet1!H6: =IF(C6=\"\",\"Output Voltage\",\"!!! Output Voltage too high. Maximum duty-cycle reached, Increase VMIN, or CIN, or VACMIN or decrease IO\")",
+    "Sheet1!E10: =IF(B10=\"\",VLOOKUP(IF(VACMIN<132,IF(E14=\"f\",(VO*IO)*3,(VO*IO)*3*2),IF(E14=\"f\",(VO*IO),(VO*IO)*2)),Capacitor_Table,1),B10)",
+    "Sheet1!H10: =IF(C10=\"\",\"Input Filter Capacitor\",CONCATENATE(\"Warning!!! VMIN is too low, Increase value of CIN > \",0.01+(INT(100*CIN_MIN)/100),\" uF\"))",
+    "Sheet1!H11: =IF(C11=\"Warning\",\"Warning!!! VMIN may drop due to high resistance. Increase CIN to ensure that VMIN > 70V\",\"Input Stage Resistance, Fuse & Filtering\")",
+    "Sheet1!H14: =IF(C14=\"\",\"Choose H for Half Wave Rectifier and F for Full Wave Rectification\",\"Error!!! Choose either H or F for type of rectification\")",
+    "Sheet1!E17: =IF(B17=\"\",IF(E14=\"F\",((2*VACMIN^2)-((2*(VO*IO)*((1/(2*FL))-(3/1000)))/(n*(CIN/10^6))))^0.5,((2*VACMIN^2)-((2*(VO*IO)*((1/(FL))-(3/1000)))/(n*(CIN/10^6))))^0.5),B17)",
+    "Sheet1!H18: =IF(C18=\"Warning\",\"Maximum input voltage is too high. Maintain maximum input voltage below 600 V\",\"Maximum DC Bus Voltage\")",
+    "Sheet1!C21: =IF(E21=\"Warning\",\"Warning\",IF(B7<=VLOOKUP(LINKSWITCH_TN,LinkSwitch_TN_Table,10,FALSE()),\"\",\"Warning\"))",
+    "Sheet1!E21: =IF(OR(B21=\"Auto\",B21=\"\"),IF(B7<=0.063,\"LNK302\",IF(B7<=0.12,\"LNK304\",IF(B7<=0.18,\"LNK305\",IF(B7<=0.36,\"LNK306\",\"Warning\")))),B21)",
+    "Sheet1!H21: =IF(C21=\"\",\"Selected LinkSwitch-TN. Ordering info - Suffix P/G indicates DIP 8 package; suffix D indicates SO8 package; second suffix N indicates lead free RoHS compliance\",\"!!! Chosen device is too small to deliver Outp",
+    "Sheet1!H27: =IF(C27=\"\",\"Estimated LinkSwitch-TN losses\",\"!!! Caution Device may become excessively hot. Verify thermal performance on bench\")",
+    "Sheet1!L28: =SQRT((M_1^2*(TON^3/3)+K_1^2*(TON)+2*K_1*M_1*(TON^2/2)+M_2^2*(TOFF_AVG^3/3)+K_2^2*(TOFF_AVG)+2*K_2*M_2*(TOFF_AVG^2/2))*FAVG)"
+   ]
+  },
+  {
+   "file": "LYTSwitch-0_Rev1.xlsx",
+   "size": 3146955,
+   "has_vba": false,
+   "external_links": 0,
+   "has_tables": false,
+   "has_pivots": false,
+   "has_charts": false,
+   "defined_names": 105,
+   "defined_names_nonsimple": 3,
+   "sheets": [
+    {
+     "name": "LYTSwitch-Zero",
+     "state": "visible",
+     "dims": "A1:IW68",
+     "formulas": 278
+    },
+    {
+     "name": "Trf Construction",
+     "state": "visible",
+     "dims": "A1:AD193",
+     "formulas": 7
+    },
+    {
+     "name": "Lists Data",
+     "state": "visible",
+     "dims": "A1:H41",
+     "formulas": 0
+    },
+    {
+     "name": "Calc",
+     "state": "visible",
+     "dims": "A1:DS1378",
+     "formulas": 153286
+    },
+    {
+     "name": "Cal2",
+     "state": "visible",
+     "dims": "A1:L19",
+     "formulas": 9
+    },
+    {
+     "name": "Revision",
+     "state": "visible",
+     "dims": "A1:E26",
+     "formulas": 0
+    }
+   ],
+   "total_formulas": 153580,
+   "array_formulas": 0,
+   "cross_sheet_formula_cells": 5307,
+   "external_ref_cells": 0,
+   "data_validations": 1,
+   "functions": {
+    "IF": 82147,
+    "ABS": 10569,
+    "EXP": 10569,
+    "SQRT": 6633,
+    "SIN": 5284,
+    "AND": 5284,
+    "VLOOKUP": 31,
+    "FALSE": 29,
+    "SUM": 29,
+    "AVERAGE": 28,
+    "OR": 5,
+    "TRUE": 2,
+    "INT": 2,
+    "LOG": 2,
+    "L": 2,
+    "CONCATENATE": 1,
+    "MIN": 1
+   },
+   "sample_long_formulas": [
+    "LYTSwitch-Zero!H8: =IF(E8<500,\"Output Current\",\"Warning!!! Enter Output current less than 0.5 Amps\")",
+    "LYTSwitch-Zero!E11: =IF(B11=\"\",VLOOKUP(IF(VACMIN<132,(VO*IO)*3,(VO*IO)),Capacitor_Table,1,TRUE()),B11)",
+    "LYTSwitch-Zero!H11: =IF(C11=\"\",\"Input Filter Capacitor\",\"Warning!!! Input capacitance too low and may cause reverse currents through switching device. Increase CIN or add drain pin blocking diode\")",
+    "LYTSwitch-Zero!E19: =IF(OR(B19=\"Auto\",B19=\"\"),IF(E8<=0.063,\"LYT0002\",IF(E8<=0.12,\"LYT0004\",IF(E8<=0.18,\"LYT0005\",IF(E8<=0.36,\"LYT0006\",\"Warning\")))),B19)",
+    "LYTSwitch-Zero!H19: =IF(C19=\"\",\"Selected LYTSwitchZero\",\"!!! Chosen device is too small to deliver Output Current, Choose larger LYTSwitchZero\")",
+    "LYTSwitch-Zero!H30: =IF(C30=\"\",\"Recommended PIV rating of Freewheeling Diode\",\"Warning!!! Choose diode with higher PIV rating\")",
+    "LYTSwitch-Zero!X36: =IF(X35<470,\"Low inductance value. Use 470uH\",IF(X35>8200,\"Inductor value too high\",VLOOKUP(VLOOKUP(X35,X16:Y31,2,TRUE())+1,Index_Inductor,2,FALSE())))",
+    "LYTSwitch-Zero!E37: =IF(CORE_TYPE=\"Drum\",\"N/A\",IF(B37=\"Custom\",B38,IF(OR(B37=\"Auto\",B37=\"\"),Rec_Trf,B37)))",
+    "LYTSwitch-Zero!AA38: =IF(CIN>1,VLOOKUP(AA37,$Z$21:$AC$24,4,FALSE()),IF(VACMIN<150,VLOOKUP(AA37,$Z$21:$AC$24,2,FALSE()),VLOOKUP(AA37,$Z$21:$AC$24,3,FALSE())))",
+    "LYTSwitch-Zero!E39: =IF(CORE_TYPE=\"Off-the-Shelf\",\"N/A\",IF(B39=\"\",VLOOKUP($E$37,CORE_TABLE,3,FALSE()),B39))",
+    "LYTSwitch-Zero!E40: =IF(CORE_TYPE=\"Off-the-Shelf\",\"N/A\",IF(B40=\"\",VLOOKUP($E$37,CORE_TABLE,4,FALSE()),B40))",
+    "LYTSwitch-Zero!E41: =IF(CORE_TYPE=\"Off-the-Shelf\",\"N/A\",IF(B41=\"\",VLOOKUP($E$37,CORE_TABLE,5,FALSE()),B41))"
+   ]
+  }
+ ],
+ "all_functions": {
+  "IF": 174154,
+  "SIN": 39442,
+  "SQRT": 25184,
+  "COS": 22236,
+  "AND": 17964,
+  "ABS": 13241,
+  "EXP": 10677,
+  "PI": 8846,
+  "CONCATENATE": 2993,
+  "VLOOKUP": 2774,
+  "INDIRECT": 2647,
+  "COSH": 1080,
+  "MATCH": 961,
+  "INDEX": 930,
+  "MAX": 721,
+  "SINH": 720,
+  "MIN": 550,
+  "FALSE": 480,
+  "MOD": 465,
+  "CEILING": 428,
+  "INT": 251,
+  "OR": 251,
+  "ASIN": 228,
+  "AVERAGE": 169,
+  "LOG": 168,
+  "TRUE": 126,
+  "SUM": 93,
+  "ROUND": 58,
+  "PDO": 27,
+  "ISNA": 27,
+  "LP": 24,
+  "MID": 19,
+  "ROUNDUP": 15,
+  "NOT": 13,
+  "FLOOR": 13,
+  "L": 10,
+  "ADDRESS": 10,
+  "APDO": 9,
+  "TEXT": 7,
+  "W": 6,
+  "HLOOKUP": 5,
+  "ISERROR": 4,
+  "SUMSQ": 4,
+  "BP": 3,
+  "ATAN": 2,
+  "VMIN": 2,
+  "ISNUMBER": 1,
+  "SEARCH": 1,
+  "DB": 1,
+  "DCM": 1,
+  "VACNOM": 1,
+  "CMA": 1,
+  "INCREASE": 1,
+  "H": 1,
+  "FIXED": 1,
+  "CIN": 1,
+  "LEN": 1,
+  "DCR": 1,
+  "TARGET": 1,
+  "VALUE": 1
+ }
+}
