@@ -60,7 +60,7 @@ Key findings:
 
 ### 5.1 Functional
 
-- **FR1 — Load:** Open any corpus workbook through xlnt; extract cell values, formula strings, defined names, and calculation settings. Shared formulas must be expanded (xlnt already does this at parse time).
+- **FR1 — Load:** Open any corpus workbook through xlnt; extract cell values, formula strings, defined names, and calculation settings. Shared formulas must be expanded **with per-member reference translation** (xlnt hands members the master's text without re-anchoring relative refs — Phase 2+3 finding; xlpp side-parses the sheet XML and translates via its own parser/printer).
 - **FR2 — Parse:** Tokenize and parse the corpus formula grammar into an AST: numbers, strings, booleans, `%` postfix, unary `±`, operators `+ - * / ^ &` and comparisons, A1 references (relative/absolute), ranges, cross-sheet refs (quoted and unquoted sheet names), defined names, function calls with omitted arguments.
 - **FR3 — Functions:** Implement the 44 corpus functions with Excel-compatible semantics (short-circuit `IF`; `VLOOKUP`/`HLOOKUP`/`MATCH` approximate- and exact-match modes; Excel's `CEILING`/`FLOOR` significance semantics; `TEXT`/`FIXED` number formatting for the handful of format codes actually used).
 - **FR4 — Defined names:** Resolve workbook- and sheet-scoped names to references or constants, including names whose definition is `#REF!` (evaluate to `#REF!` error, not a load failure).
@@ -85,9 +85,10 @@ Provided by xlnt: xlsx load; `cell::formula()` as string with shared-formula exp
 Gaps the project must cover:
 
 1. **No formula evaluator** — the core of this project.
-2. **Defined names:** public API exposes only simple `named_range`s; the internal `detail::defined_name` (which carries the raw value string, including constants and `#REF!`) is not public. Mitigation: side-parse `xl/workbook.xml` `<definedNames>` directly (trivial XML), or carry a small xlnt patch.
-3. **Iteration settings:** `calculation_properties` only holds `calc_id`/`concurrent_calc`; `iterate`, `iterateCount`, `iterateDelta` are dropped. Mitigation: same side-parse of `xl/workbook.xml` `<calcPr>`.
-4. **Parse fidelity risk:** xlnt's reading of these specific files (some 3–4 MB, 150k+ formulas) must be validated early — Phase 0 spike.
+2. **Defined names:** public API exposes only simple `named_range`s; the internal `detail::defined_name` (which carries the raw value string, including constants and `#REF!`) is not public. Mitigation: side-parse `xl/workbook.xml` `<definedNames>` directly (trivial XML), or carry a small xlnt patch. *(Implemented as side-parse in Phase 0.)*
+3. **Iteration settings:** `calculation_properties` only holds `calc_id`/`concurrent_calc`; `iterate`, `iterateCount`, `iterateDelta` are dropped. Mitigation: same side-parse of `xl/workbook.xml` `<calcPr>`. *(Implemented in Phase 0.)*
+4. **Parse fidelity risk:** xlnt's reading of these specific files (some 3–4 MB, 150k+ formulas) must be validated early — Phase 0 spike. *(Validated: counts and values exact.)*
+5. **Shared formulas are not translated** *(found in Phase 2+3)*: xlnt assigns every member of a `<f t="shared">` group the master's formula text without shifting relative references, silently producing wrong formulas for member cells. Mitigation (implemented): side-parse each sheet's XML for shared groups and translate the master per member via the xlpp parser/printer.
 
 ## 7. Success Metrics
 

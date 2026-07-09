@@ -341,4 +341,8 @@ Ast parse_formula(const std::string &formula) {
     return parser.run();
 }
 
+bool parse_a1_reference(const std::string &text, CellAddress &address) {
+    return parse_cell_identifier(text, address);
+}
+
 } // namespace xlpp
