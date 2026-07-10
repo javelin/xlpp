@@ -107,9 +107,10 @@ std::vector<std::string> sheet_part_names(const std::string &xlsx_path,
 
 } // namespace
 
-SharedFormulaPatches load_shared_formula_patches(const std::string &xlsx_path,
-                                                 const std::vector<std::string> &sheet_names) {
-    SharedFormulaPatches patches;
+SheetFormulaScan scan_sheet_formulas(const std::string &xlsx_path,
+                                     const std::vector<std::string> &sheet_names) {
+    SheetFormulaScan scan;
+    SharedFormulaPatches &patches = scan.shared;
     const std::vector<std::string> parts = sheet_part_names(xlsx_path, sheet_names.size());
 
     for (std::size_t sheet = 0; sheet < parts.size(); ++sheet) {
@@ -155,6 +156,41 @@ SharedFormulaPatches load_shared_formula_patches(const std::string &xlsx_path,
             const XmlTag formula = find_xml_tag(xml, "f", next_f);
             pos = formula.content_begin;
             const std::string *type = formula.attr("t");
+            if (type != nullptr && *type == "array") {
+                const std::string *ref = formula.attr("ref");
+                if (ref == nullptr) {
+                    throw std::runtime_error("shared_formulas: array <f> without ref in " +
+                                             parts[sheet]);
+                }
+                const std::string text =
+                    formula.self_closing ? std::string()
+                                         : xml_element_text(xml, formula, "f");
+                if (!formula.self_closing) {
+                    pos = xml.find("</f>", formula.content_begin) + 4;
+                }
+                if (text.empty()) {
+                    continue; // member of a multi-anchor group; anchor carries text
+                }
+                ArrayBlockInfo block;
+                block.sheet = static_cast<std::uint32_t>(sheet);
+                const std::size_t colon = ref->find(':');
+                std::uint32_t c1 = 0, r1 = 0, c2 = 0, r2 = 0;
+                if (!parse_ref_attr(colon == std::string::npos ? *ref : ref->substr(0, colon),
+                                    c1, r1) ||
+                    !parse_ref_attr(colon == std::string::npos ? *ref
+                                                               : ref->substr(colon + 1),
+                                    c2, r2)) {
+                    throw std::runtime_error("shared_formulas: bad array ref '" + *ref +
+                                             "' in " + parts[sheet]);
+                }
+                block.col_first = std::min(c1, c2);
+                block.col_last = std::max(c1, c2);
+                block.row_first = std::min(r1, r2);
+                block.row_last = std::max(r1, r2);
+                block.formula = text;
+                scan.arrays.push_back(std::move(block));
+                continue;
+            }
             if (type == nullptr || *type != "shared") {
                 continue;
             }
@@ -191,7 +227,7 @@ SharedFormulaPatches load_shared_formula_patches(const std::string &xlsx_path,
             patches.emplace(member.second, to_formula(ast));
         }
     }
-    return patches;
+    return scan;
 }
 
 } // namespace detail

@@ -18,10 +18,24 @@ namespace detail {
 // key: (sheet_index << 48) | (column << 28) | row — same packing as CellKey.
 using SharedFormulaPatches = std::unordered_map<std::uint64_t, std::string>;
 
+// One legacy CSE array block: <f t="array" ref="AG42:AG48">MMULT(...)</f> on
+// the anchor cell; every cell of ref receives one element of the result.
+struct ArrayBlockInfo {
+    std::uint32_t sheet = 0;
+    std::uint32_t row_first = 0, col_first = 0;
+    std::uint32_t row_last = 0, col_last = 0;
+    std::string formula;
+};
+
+struct SheetFormulaScan {
+    SharedFormulaPatches shared;      // member cell -> translated formula
+    std::vector<ArrayBlockInfo> arrays;
+};
+
 // sheet_names must be workbook.xml order (the sidecar's). Throws
 // std::runtime_error on structurally broken files.
-SharedFormulaPatches load_shared_formula_patches(const std::string &xlsx_path,
-                                                 const std::vector<std::string> &sheet_names);
+SheetFormulaScan scan_sheet_formulas(const std::string &xlsx_path,
+                                     const std::vector<std::string> &sheet_names);
 
 } // namespace detail
 } // namespace xlpp

@@ -50,4 +50,5 @@ target_compile_options(parse_corpus PRIVATE -Wall -Wextra)
 
 add_executable(verify tools/verify.cpp)
 target_link_libraries(verify PRIVATE xlpp_core)
+target_include_directories(verify PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src) # staleness prover
 target_compile_options(verify PRIVATE -Wall -Wextra)

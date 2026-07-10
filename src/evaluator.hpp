@@ -9,6 +9,7 @@
 #include <xlpp/workbook_model.hpp>
 
 #include <unordered_map>
+#include <vector>
 
 namespace xlpp {
 namespace detail {
@@ -30,12 +31,23 @@ struct PendingCell {
 
 class Evaluator {
 public:
-    Evaluator(const WorkbookModel &model, const std::unordered_map<CellKey, Value> &computed)
-        : model_(model), computed_(computed) {
+    // cached_view: read cached values for uncomputed formula cells instead of
+    // raising PendingCell — used by the harness's staleness prover, which
+    // re-evaluates a formula against the file's own cached state to decide
+    // whether a cached result is self-consistent.
+    Evaluator(const WorkbookModel &model, const std::unordered_map<CellKey, Value> &computed,
+              bool cached_view = false)
+        : model_(model), computed_(computed), cached_view_(cached_view) {
     }
 
     // anchor: the cell owning the formula (implicit intersection, name scope).
     Value evaluate_cell(CellKey anchor, const Ast &ast);
+
+    // Evaluates a CSE array-block formula (the corpus shape is
+    // MMULT(MINVERSE(NxN), Nx1)); returns rows*cols values in row-major
+    // order, one per member cell of the block (Phase 4, PRD FR3/FR7).
+    std::vector<Value> evaluate_array_block(CellKey anchor, const Ast &ast,
+                                            std::uint32_t rows, std::uint32_t cols);
 
 private:
     struct EvalResult {
@@ -52,13 +64,18 @@ private:
     EvalResult eval(const Ast &ast, NodeId id);
     EvalResult eval_reference(const Node &node);
     EvalResult eval_name(const Node &node);
-    Value eval_call(const Ast &ast, const Node &node);
+    EvalResult eval_call(const Ast &ast, const Node &node);
+    EvalResult eval_indirect(const Ast &ast, const Node &node);
+    EvalResult eval_offset(const Ast &ast, const Node &node);
+    Value eval_address(const Ast &ast, const Node &node);
+    Value eval_call_scalar(const Ast &ast, const Node &node);
     Value scalar(const EvalResult &result);          // implicit intersection
     Value cell_value(std::int32_t sheet, std::uint32_t column, std::uint32_t row) const;
     std::int32_t resolve_sheet(const Node &node);
 
     const WorkbookModel &model_;
     const std::unordered_map<CellKey, Value> &computed_;
+    bool cached_view_ = false;
     CellKey anchor_ = 0;
     int name_depth_ = 0;
     // Hot-path caches: sheet-name and defined-name resolution both involve

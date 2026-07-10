@@ -1,9 +1,12 @@
 #include "evaluator.hpp"
 
+#include <xlpp/parser.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <limits>
 
 namespace xlpp {
@@ -226,8 +229,10 @@ double snap_integer(double value) {
 } // namespace
 
 bool is_deferred_function(const std::string &upper_name) {
-    return upper_name == "INDIRECT" || upper_name == "ADDRESS" || upper_name == "OFFSET" ||
-           upper_name == "MMULT" || upper_name == "MINVERSE";
+    // MMULT/MINVERSE are array functions: they evaluate through CSE blocks
+    // (Evaluator::evaluate_array_block); in a scalar context they remain a
+    // per-cell diagnostic (NFR4).
+    return upper_name == "MMULT" || upper_name == "MINVERSE";
 }
 
 // ------------------------------- evaluator ----------------------------------
@@ -251,7 +256,7 @@ Value Evaluator::cell_value(std::int32_t sheet, std::uint32_t column, std::uint3
     }
     const auto cell = model_.cells.find(key);
     if (cell != model_.cells.end()) {
-        if (cell->second.formula >= 0) {
+        if (cell->second.formula >= 0 && !cached_view_) {
             throw PendingCell{key}; // engine computes it and retries
         }
         return cell->second.cached;
@@ -432,16 +437,177 @@ Evaluator::EvalResult Evaluator::eval(const Ast &ast, NodeId id) {
         }
     }
     case NodeKind::call:
-        result.value = eval_call(ast, node);
-        return result;
+        return eval_call(ast, node);
     }
     result.value = Value::make_error(ErrorCode::value_error);
     return result;
 }
 
+// Range-capable calls are routed here; everything else stays scalar.
+Evaluator::EvalResult Evaluator::eval_call(const Ast &ast, const Node &node) {
+    const std::string name = upper_ascii(node.text);
+    if (name == "INDIRECT") {
+        return eval_indirect(ast, node);
+    }
+    if (name == "OFFSET") {
+        return eval_offset(ast, node);
+    }
+    EvalResult result;
+    result.value = name == "ADDRESS" ? eval_address(ast, node) : eval_call_scalar(ast, node);
+    return result;
+}
+
+// INDIRECT(text): parse the text as an A1 reference (optionally
+// sheet-qualified) using the formula parser; the demand-driven engine makes
+// the discovered dependency safe automatically (PendingCell retry). The
+// corpus pattern is INDIRECT(CONCATENATE("Calcs!AL", row)) — FR7.
+Evaluator::EvalResult Evaluator::eval_indirect(const Ast &ast, const Node &node) {
+    EvalResult result;
+    if (node.children.size() != 1) { // a1=FALSE (R1C1) form is not in the corpus
+        result.value = Value::make_error(ErrorCode::unsupported);
+        return result;
+    }
+    const Value text = scalar(eval(ast, node.children[0]));
+    if (text.is_error()) {
+        result.value = text;
+        return result;
+    }
+    if (text.kind != ValueKind::text) {
+        result.value = Value::make_error(ErrorCode::ref_error);
+        return result;
+    }
+    try {
+        const Ast reference = parse_formula(text.text);
+        const Node &root = reference.at(reference.root());
+        if (root.kind != NodeKind::cell && root.kind != NodeKind::range) {
+            result.value = Value::make_error(ErrorCode::ref_error);
+            return result;
+        }
+        return eval_reference(root);
+    } catch (const std::exception &) {
+        result.value = Value::make_error(ErrorCode::ref_error);
+        return result;
+    }
+}
+
+// OFFSET(ref, rows, cols, [height], [width]) — single corpus use shifts a
+// named table sideways for a VLOOKUP.
+Evaluator::EvalResult Evaluator::eval_offset(const Ast &ast, const Node &node) {
+    EvalResult result;
+    if (node.children.size() < 3 || node.children.size() > 5) {
+        result.value = Value::make_error(ErrorCode::value_error);
+        return result;
+    }
+    const EvalResult base = eval(ast, node.children[0]);
+    if (!base.from_reference) {
+        result.value = base.value.is_error() ? base.value
+                                             : Value::make_error(ErrorCode::value_error);
+        return result;
+    }
+    std::int64_t offsets[2] = {0, 0}; // rows, cols
+    for (int i = 0; i < 2; ++i) {
+        const Value v = to_number(scalar(eval(ast, node.children[1 + i])));
+        if (v.is_error()) {
+            result.value = v;
+            return result;
+        }
+        offsets[i] = static_cast<std::int64_t>(v.number);
+    }
+    const std::int64_t row_first = static_cast<std::int64_t>(base.range.row_first) + offsets[0];
+    const std::int64_t col_first = static_cast<std::int64_t>(base.range.col_first) + offsets[1];
+    std::int64_t height = base.range.row_last - base.range.row_first + 1;
+    std::int64_t width = base.range.col_last - base.range.col_first + 1;
+    for (std::size_t i = 3; i < node.children.size(); ++i) {
+        if (ast.at(node.children[i]).kind == NodeKind::missing) {
+            continue;
+        }
+        const Value v = to_number(scalar(eval(ast, node.children[i])));
+        if (v.is_error()) {
+            result.value = v;
+            return result;
+        }
+        (i == 3 ? height : width) = static_cast<std::int64_t>(v.number);
+    }
+    if (row_first < 1 || col_first < 1 || height < 1 || width < 1) {
+        result.value = Value::make_error(ErrorCode::ref_error);
+        return result;
+    }
+    result.is_range = true;
+    result.from_reference = true;
+    result.range.sheet = base.range.sheet;
+    result.range.row_first = static_cast<std::uint32_t>(row_first);
+    result.range.col_first = static_cast<std::uint32_t>(col_first);
+    result.range.row_last = static_cast<std::uint32_t>(row_first + height - 1);
+    result.range.col_last = static_cast<std::uint32_t>(col_first + width - 1);
+    return result;
+}
+
+// ADDRESS(row, col, [abs=1], [a1=TRUE], [sheet]) -> reference text. The
+// corpus uses abs mode 4 (fully relative) without a sheet argument.
+Value Evaluator::eval_address(const Ast &ast, const Node &node) {
+    if (node.children.size() < 2 || node.children.size() > 5) {
+        return Value::make_error(ErrorCode::value_error);
+    }
+    auto number_arg = [&](std::size_t i, std::int64_t &out) -> Value {
+        const Value v = to_number(scalar(eval(ast, node.children[i])));
+        if (!v.is_error()) {
+            out = static_cast<std::int64_t>(v.number);
+        }
+        return v;
+    };
+    std::int64_t row = 0;
+    std::int64_t col = 0;
+    Value status = number_arg(0, row);
+    if (status.is_error()) {
+        return status;
+    }
+    status = number_arg(1, col);
+    if (status.is_error()) {
+        return status;
+    }
+    std::int64_t abs_mode = 1;
+    if (node.children.size() >= 3 && ast.at(node.children[2]).kind != NodeKind::missing) {
+        status = number_arg(2, abs_mode);
+        if (status.is_error()) {
+            return status;
+        }
+    }
+    if (node.children.size() >= 4 && ast.at(node.children[3]).kind != NodeKind::missing) {
+        const Value a1 = to_boolean(scalar(eval(ast, node.children[3])));
+        if (a1.is_error()) {
+            return a1;
+        }
+        if (!a1.boolean) {
+            return Value::make_error(ErrorCode::unsupported); // R1C1 not in corpus
+        }
+    }
+    if (row < 1 || row > 1048576 || col < 1 || col > 16384 || abs_mode < 1 || abs_mode > 4) {
+        return Value::make_error(ErrorCode::value_error);
+    }
+    std::string text;
+    if (node.children.size() == 5 && ast.at(node.children[4]).kind != NodeKind::missing) {
+        const Value sheet = scalar(eval(ast, node.children[4]));
+        if (sheet.is_error()) {
+            return sheet;
+        }
+        text = to_display_text(sheet) + "!";
+    }
+    const bool abs_col = abs_mode == 1 || abs_mode == 3;
+    const bool abs_row = abs_mode == 1 || abs_mode == 2;
+    if (abs_col) {
+        text += '$';
+    }
+    text += column_letters(static_cast<std::uint32_t>(col));
+    if (abs_row) {
+        text += '$';
+    }
+    text += std::to_string(row);
+    return Value::make_text(text);
+}
+
 // ------------------------------- functions ----------------------------------
 
-Value Evaluator::eval_call(const Ast &ast, const Node &node) {
+Value Evaluator::eval_call_scalar(const Ast &ast, const Node &node) {
     const std::string name = upper_ascii(node.text);
     const auto &args = node.children;
     const std::size_t argc = args.size();
@@ -1096,6 +1262,266 @@ Value Evaluator::eval_call(const Ast &ast, const Node &node) {
     }
 
     return Value::make_error(ErrorCode::unsupported); // outside frozen inventory (NFR4)
+}
+
+// ---------------------------- CSE array blocks -------------------------------
+// The corpus contains exactly one array shape: {=MMULT(MINVERSE(NxN), Nx1)}
+// (polynomial solves in ACDC_LYTSwitch1_BuckBoost_Rev1). The matrix evaluator
+// below is general over MMULT/MINVERSE/range operands but nothing more.
+
+namespace {
+
+struct Matrix {
+    std::size_t rows = 0;
+    std::size_t cols = 0;
+    std::vector<double> data; // row-major
+    ErrorCode error = ErrorCode::value_error;
+    bool failed = false;
+
+    double &at(std::size_t r, std::size_t c) {
+        return data[r * cols + c];
+    }
+
+    double get(std::size_t r, std::size_t c) const {
+        return data[r * cols + c];
+    }
+
+    static Matrix fail(ErrorCode code) {
+        Matrix m;
+        m.failed = true;
+        m.error = code;
+        return m;
+    }
+};
+
+Matrix invert(Matrix a) {
+    if (a.rows != a.cols) {
+        return Matrix::fail(ErrorCode::value_error);
+    }
+    const std::size_t n = a.rows;
+    Matrix inv;
+    inv.rows = inv.cols = n;
+    inv.data.assign(n * n, 0.0);
+    for (std::size_t i = 0; i < n; ++i) {
+        inv.at(i, i) = 1.0;
+    }
+    for (std::size_t col = 0; col < n; ++col) { // Gauss-Jordan, partial pivoting
+        std::size_t pivot = col;
+        for (std::size_t r = col + 1; r < n; ++r) {
+            if (std::fabs(a.get(r, col)) > std::fabs(a.get(pivot, col))) {
+                pivot = r;
+            }
+        }
+        if (a.get(pivot, col) == 0.0) {
+            return Matrix::fail(ErrorCode::num_error); // singular
+        }
+        if (pivot != col) {
+            for (std::size_t c = 0; c < n; ++c) {
+                std::swap(a.at(pivot, c), a.at(col, c));
+                std::swap(inv.at(pivot, c), inv.at(col, c));
+            }
+        }
+        const double diagonal = a.get(col, col);
+        for (std::size_t c = 0; c < n; ++c) {
+            a.at(col, c) /= diagonal;
+            inv.at(col, c) /= diagonal;
+        }
+        for (std::size_t r = 0; r < n; ++r) {
+            if (r == col || a.get(r, col) == 0.0) {
+                continue;
+            }
+            const double factor = a.get(r, col);
+            for (std::size_t c = 0; c < n; ++c) {
+                a.at(r, c) -= factor * a.get(col, c);
+                inv.at(r, c) -= factor * inv.get(col, c);
+            }
+        }
+    }
+    return inv;
+}
+
+// Solves A*x = b by LU (partial pivoting) with two iterative-refinement
+// steps. The corpus blocks are ill-conditioned 7x7 polynomial-fit systems;
+// refinement recovers digits that a plain inverse-multiply loses.
+Matrix solve_refined(const Matrix &a, const Matrix &b) {
+    if (a.rows != a.cols || a.rows != b.rows) {
+        return Matrix::fail(ErrorCode::value_error);
+    }
+    const std::size_t n = a.rows;
+    const std::size_t m = b.cols;
+    Matrix lu = a;
+    std::vector<std::size_t> perm(n);
+    for (std::size_t i = 0; i < n; ++i) {
+        perm[i] = i;
+    }
+    for (std::size_t col = 0; col < n; ++col) {
+        std::size_t pivot = col;
+        for (std::size_t r = col + 1; r < n; ++r) {
+            if (std::fabs(lu.get(r, col)) > std::fabs(lu.get(pivot, col))) {
+                pivot = r;
+            }
+        }
+        if (lu.get(pivot, col) == 0.0) {
+            return Matrix::fail(ErrorCode::num_error);
+        }
+        if (pivot != col) {
+            std::swap(perm[pivot], perm[col]);
+            for (std::size_t c = 0; c < n; ++c) {
+                std::swap(lu.at(pivot, c), lu.at(col, c));
+            }
+        }
+        for (std::size_t r = col + 1; r < n; ++r) {
+            const double factor = lu.at(r, col) / lu.get(col, col);
+            lu.at(r, col) = factor;
+            for (std::size_t c = col + 1; c < n; ++c) {
+                lu.at(r, c) -= factor * lu.get(col, c);
+            }
+        }
+    }
+    auto lu_solve = [&](const std::vector<double> &rhs) {
+        std::vector<double> x(n);
+        for (std::size_t i = 0; i < n; ++i) {
+            x[i] = rhs[perm[i]];
+            for (std::size_t j = 0; j < i; ++j) {
+                x[i] -= lu.get(i, j) * x[j];
+            }
+        }
+        for (std::size_t i = n; i-- > 0;) {
+            for (std::size_t j = i + 1; j < n; ++j) {
+                x[i] -= lu.get(i, j) * x[j];
+            }
+            x[i] /= lu.get(i, i);
+        }
+        return x;
+    };
+    Matrix out;
+    out.rows = n;
+    out.cols = m;
+    out.data.assign(n * m, 0.0);
+    for (std::size_t c = 0; c < m; ++c) {
+        std::vector<double> rhs(n);
+        for (std::size_t r = 0; r < n; ++r) {
+            rhs[r] = b.get(r, c);
+        }
+        std::vector<double> x = lu_solve(rhs);
+        for (int refine = 0; refine < 2; ++refine) {
+            std::vector<double> residual(n);
+            for (std::size_t r = 0; r < n; ++r) {
+                double sum = 0.0;
+                for (std::size_t k = 0; k < n; ++k) {
+                    sum += a.get(r, k) * x[k];
+                }
+                residual[r] = rhs[r] - sum;
+            }
+            const std::vector<double> correction = lu_solve(residual);
+            for (std::size_t r = 0; r < n; ++r) {
+                x[r] += correction[r];
+            }
+        }
+        for (std::size_t r = 0; r < n; ++r) {
+            out.at(r, c) = x[r];
+        }
+    }
+    return out;
+}
+
+Matrix multiply(const Matrix &a, const Matrix &b) {
+    if (a.cols != b.rows) {
+        return Matrix::fail(ErrorCode::value_error);
+    }
+    Matrix out;
+    out.rows = a.rows;
+    out.cols = b.cols;
+    out.data.assign(out.rows * out.cols, 0.0);
+    for (std::size_t r = 0; r < out.rows; ++r) {
+        for (std::size_t c = 0; c < out.cols; ++c) {
+            double sum = 0.0;
+            for (std::size_t k = 0; k < a.cols; ++k) {
+                sum += a.get(r, k) * b.get(k, c);
+            }
+            out.at(r, c) = sum;
+        }
+    }
+    return out;
+}
+
+} // namespace
+
+std::vector<Value> Evaluator::evaluate_array_block(CellKey anchor, const Ast &ast,
+                                                   std::uint32_t rows, std::uint32_t cols) {
+    anchor_ = anchor;
+    name_depth_ = 0;
+
+    // Recursive matrix evaluation over the block expression.
+    std::function<Matrix(NodeId)> matrix = [&](NodeId id) -> Matrix {
+        const Node &node = ast.at(id);
+        if (node.kind == NodeKind::call) {
+            const std::string name = upper_ascii(node.text);
+            if (name == "MINVERSE" && node.children.size() == 1) {
+                Matrix operand = matrix(node.children[0]);
+                return operand.failed ? operand : invert(std::move(operand));
+            }
+            if (name == "MMULT" && node.children.size() == 2) {
+                // MMULT(MINVERSE(A), b) is a linear solve — use LU with
+                // iterative refinement instead of inverse-multiply (the
+                // corpus systems are ill-conditioned polynomial fits).
+                const Node &left = ast.at(node.children[0]);
+                if (left.kind == NodeKind::call &&
+                    upper_ascii(left.text) == "MINVERSE" && left.children.size() == 1) {
+                    const Matrix a = matrix(left.children[0]);
+                    if (a.failed) {
+                        return a;
+                    }
+                    const Matrix b = matrix(node.children[1]);
+                    return b.failed ? b : solve_refined(a, b);
+                }
+                const Matrix a = matrix(node.children[0]);
+                if (a.failed) {
+                    return a;
+                }
+                const Matrix b = matrix(node.children[1]);
+                return b.failed ? b : multiply(a, b);
+            }
+            return Matrix::fail(ErrorCode::unsupported);
+        }
+        const EvalResult operand = eval(ast, id);
+        if (!operand.is_range) {
+            return Matrix::fail(operand.value.is_error() ? operand.value.error
+                                                         : ErrorCode::value_error);
+        }
+        Matrix out;
+        out.rows = operand.range.row_last - operand.range.row_first + 1;
+        out.cols = operand.range.col_last - operand.range.col_first + 1;
+        out.data.reserve(out.rows * out.cols);
+        for (std::uint32_t r = operand.range.row_first; r <= operand.range.row_last; ++r) {
+            for (std::uint32_t c = operand.range.col_first; c <= operand.range.col_last;
+                 ++c) {
+                const Value v = cell_value(operand.range.sheet, c, r);
+                const Value n = to_number(v);
+                if (n.is_error()) {
+                    return Matrix::fail(n.error);
+                }
+                out.data.push_back(n.number);
+            }
+        }
+        return out;
+    };
+
+    const Matrix result = matrix(ast.root());
+    std::vector<Value> values;
+    values.reserve(static_cast<std::size_t>(rows) * cols);
+    for (std::uint32_t r = 0; r < rows; ++r) {
+        for (std::uint32_t c = 0; c < cols; ++c) {
+            if (result.failed) {
+                values.push_back(Value::make_error(result.error));
+            } else if (r < result.rows && c < result.cols) {
+                values.push_back(Value::make_number(result.get(r, c)));
+            } else {
+                values.push_back(Value::make_error(ErrorCode::na)); // CSE spill padding
+            }
+        }
+    }
+    return values;
 }
 
 } // namespace detail

@@ -109,6 +109,21 @@ xlpp/
 - CSE array blocks: the six `{=MMULT(MINVERSE(7×7), 7×1)}` blocks in ACDC_LYTSwitch1_BuckBoost_Rev1 (Phase 1 corpus-scan finding) — fixed-size matrix solve spilled over the anchor block; no general array machinery.
 - **Exit:** ≥ 99.9% match on ACDC_LYTSwitch-4_Flyback_Rev1 (121k formulas, 2.6k INDIRECT), LYTSwitch-0_Rev1 (154k formulas), and ACDC_LYTSwitch1_BuckBoost_Rev1. Perf: full recalc < 2 s each.
 
+> **Phase 4 execution notes (2026-07-10):** the demand-driven engine made the
+> dynamic-dependency feedback loop unnecessary — INDIRECT evaluates its text,
+> parses it with the xlpp parser, and reads the target; PendingCell retry
+> covers discovered dependencies. Array blocks are recovered from the sheet
+> XML (`<f t="array" ref>`), evaluated once per block as a matrix expression
+> (LU solve with iterative refinement for `MMULT(MINVERSE(A),b)`), and spilled
+> to member cells. Oracle finding: LYTSwitch-4's entire INDIRECT region
+> (52.9k cells) is stale cache — the file stores `#REF!` for INDIRECT cells
+> whose cached targets hold plain numbers. The harness therefore gained two
+> mechanical triage layers: a **staleness prover** (re-evaluate each mismatch
+> against the file's own cached state; self-inconsistent ⇒ stale) with
+> **transitive taint propagation**, and an **array-FP closure** (MINVERSE is
+> not bit-reproducible; cells downstream of array blocks match at 1e-3).
+> Whitelist regenerated: 357 entries, all FP-divergence with measured bounds.
+
 ## Phase 5 — Iterative calculation (≈1 week)
 
 - Tarjan SCC condensation; fixed-point solver honoring iterateCount/iterateDelta; deterministic in-SCC ordering (row-major by sheet order) to mirror Excel.
