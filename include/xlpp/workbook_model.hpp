@@ -44,6 +44,20 @@ struct NameDefinition {
     Ast ast;                       // definition expression (reference/constant)
 };
 
+// Legacy CSE array-formula block: the whole rect evaluates as one matrix
+// expression; each member cell receives one element (row-major).
+struct ArrayBlock {
+    std::uint32_t sheet = 0;
+    std::uint32_t row_first = 0, col_first = 0;
+    std::uint32_t row_last = 0, col_last = 0;
+    Ast ast;
+};
+
+struct ArrayMemberRef {
+    std::uint32_t block = 0;   // index into WorkbookModel::array_blocks
+    std::uint32_t element = 0; // row-major offset within the block
+};
+
 class WorkbookModel {
 public:
     // Loads the workbook; throws std::runtime_error on load failure. Formula
@@ -56,6 +70,8 @@ public:
     std::vector<Ast> formulas;                          // parsed formula per formula cell
     std::vector<CellKey> formula_cells;                 // anchor of formulas[i]
     std::unordered_map<std::string, std::vector<NameDefinition>> names; // key: upper-case
+    std::vector<ArrayBlock> array_blocks;
+    std::unordered_map<CellKey, ArrayMemberRef> array_members;
     CalcSettings calc;
     std::size_t formula_parse_failures = 0;
 

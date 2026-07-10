@@ -242,8 +242,27 @@ void Engine::recalculate() {
             }
             state[index] = 1;
             try {
-                Value result = evaluator.evaluate_cell(anchor, model_.formulas[index]);
-                computed_[anchor] = std::move(result);
+                const auto member = model_.array_members.find(anchor);
+                if (member != model_.array_members.end()) {
+                    // CSE block: evaluate the matrix once, publish every
+                    // member element (later members skip via computed_).
+                    const ArrayBlock &block = model_.array_blocks[member->second.block];
+                    const std::uint32_t rows = block.row_last - block.row_first + 1;
+                    const std::uint32_t cols = block.col_last - block.col_first + 1;
+                    const std::vector<Value> elements = evaluator.evaluate_array_block(
+                        make_cell_key(block.sheet, block.col_first, block.row_first),
+                        block.ast, rows, cols);
+                    for (std::uint32_t row = 0; row < rows; ++row) {
+                        for (std::uint32_t col = 0; col < cols; ++col) {
+                            computed_[make_cell_key(block.sheet, block.col_first + col,
+                                                    block.row_first + row)] =
+                                elements[row * cols + col];
+                        }
+                    }
+                } else {
+                    computed_[anchor] =
+                        evaluator.evaluate_cell(anchor, model_.formulas[index]);
+                }
                 state[index] = 2;
                 work.pop_back();
             } catch (const detail::PendingCell &pending) {

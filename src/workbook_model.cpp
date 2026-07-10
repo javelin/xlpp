@@ -56,9 +56,35 @@ WorkbookModel WorkbookModel::load(const std::string &xlsx_path) {
     model.sheet_names = sidecar.sheet_names;
 
     // xlnt gives shared-formula members the master's text without
-    // re-anchoring relative refs; these patches carry the translated text.
-    const detail::SharedFormulaPatches shared_patches =
-        detail::load_shared_formula_patches(xlsx_path, model.sheet_names);
+    // re-anchoring relative refs; the scan carries translated member text
+    // plus the CSE array blocks (which evaluate as whole matrices).
+    const detail::SheetFormulaScan scan =
+        detail::scan_sheet_formulas(xlsx_path, model.sheet_names);
+    const detail::SharedFormulaPatches &shared_patches = scan.shared;
+    for (const detail::ArrayBlockInfo &info : scan.arrays) {
+        try {
+            ArrayBlock block;
+            block.sheet = info.sheet;
+            block.row_first = info.row_first;
+            block.col_first = info.col_first;
+            block.row_last = info.row_last;
+            block.col_last = info.col_last;
+            block.ast = parse_formula(info.formula);
+            const auto index = static_cast<std::uint32_t>(model.array_blocks.size());
+            const std::uint32_t width = info.col_last - info.col_first + 1;
+            for (std::uint32_t row = info.row_first; row <= info.row_last; ++row) {
+                for (std::uint32_t col = info.col_first; col <= info.col_last; ++col) {
+                    ArrayMemberRef member;
+                    member.block = index;
+                    member.element = (row - info.row_first) * width + (col - info.col_first);
+                    model.array_members.emplace(make_cell_key(info.sheet, col, row), member);
+                }
+            }
+            model.array_blocks.push_back(std::move(block));
+        } catch (const std::exception &) {
+            ++model.formula_parse_failures; // NFR4: degrade, don't crash
+        }
+    }
 
     xlnt::workbook workbook;
     workbook.load(xlsx_path);
