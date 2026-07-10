@@ -106,11 +106,11 @@ Gaps the project must cover:
 | xlnt load failures on edge files | Low | Phase 0 loads all 97 files first |
 | `TEXT`/`FIXED` format-code semantics | Low | Only implement format codes observed in corpus |
 
-## 9. Open Questions
+## 9. Open Questions — resolved as scoped follow-ups (Phase 6)
 
-1. Should the engine expose which cells are "inputs" (the workbooks use data-validation dropdowns and unlocked cells that could identify them automatically)?
-2. Is write-back (saving computed workbooks) needed in a later phase?
-3. Target binding beyond C++ (Python?) — xlnt already has Python bindings infrastructure.
+1. **Input-cell discovery** — deferred to a v0.2 follow-up. The mechanics are in place: data-validation lists live in the sheet XML (the side-parse infrastructure can read them), and non-formula numeric cells referenced by formulas are enumerable from the engine's reference rects. Proposed API: `Engine::input_cells()` returning key + validation metadata.
+2. **Write-back** — deferred; xlnt's writer can serialize the model, but computed values must be written as cached `<v>` values under the existing formulas, and shared-formula groups must be preserved untouched. Estimated as a small standalone phase when a consumer needs it.
+3. **Python binding** — recommended follow-up once the C++ API stabilizes past v0.1; pybind11 is already vendored via xlnt. The Engine surface (load/set_value/recalculate/value/stats) maps 1:1 to a small Python class.
 
 ## Appendix A — Sampling method
 

@@ -226,6 +226,19 @@ double snap_integer(double value) {
     return value;
 }
 
+// Lookup candidate comparison with boundary snapping: a key drifting one ulp
+// below a table boundary (e.g. LM/Ll = 3.9999999999999996 vs a "4" row) must
+// not discontinuously select the previous row. Applies to numeric candidates
+// in VLOOKUP/HLOOKUP/MATCH only; general comparison semantics are unchanged.
+bool lookup_nearly_equal(double a, double b) {
+    return std::fabs(a - b) <= 1e-9 * std::max(std::fabs(a), std::fabs(b));
+}
+
+// candidate <= key, with the boundary tolerance above.
+bool lookup_at_most(double candidate, double key) {
+    return candidate <= key || lookup_nearly_equal(candidate, key);
+}
+
 } // namespace
 
 bool is_deferred_function(const std::string &upper_name) {
@@ -868,6 +881,17 @@ Value Evaluator::eval_call_scalar(const Ast &ast, const Node &node) {
                 !(candidate.kind == ValueKind::number && key.kind == ValueKind::number)) {
                 continue;
             }
+            if (candidate.kind == ValueKind::number && key.kind == ValueKind::number) {
+                if (lookup_nearly_equal(candidate.number, key.number)) {
+                    match_lane = lane;
+                    if (!approximate) {
+                        break;
+                    }
+                } else if (approximate && lookup_at_most(candidate.number, key.number)) {
+                    match_lane = lane;
+                }
+                continue;
+            }
             const Value cmp_eq = compare(candidate, key, BinaryOp::equal);
             if (cmp_eq.kind == ValueKind::boolean && cmp_eq.boolean) {
                 match_lane = lane;
@@ -926,6 +950,20 @@ Value Evaluator::eval_call_scalar(const Ast &ast, const Node &node) {
             const Value candidate = cell_value(r.sheet, col, row);
             if (candidate.kind != key.kind &&
                 !(candidate.kind == ValueKind::number && key.kind == ValueKind::number)) {
+                continue;
+            }
+            if (candidate.kind == ValueKind::number && key.kind == ValueKind::number) {
+                if (lookup_nearly_equal(candidate.number, key.number)) {
+                    best = lane;
+                    if (match_type <= 0) {
+                        break;
+                    }
+                } else if (match_type == 1 && lookup_at_most(candidate.number, key.number)) {
+                    best = lane;
+                } else if (match_type == -1 &&
+                           lookup_at_most(key.number, candidate.number)) {
+                    best = lane;
+                }
                 continue;
             }
             const Value cmp_eq = compare(candidate, key, BinaryOp::equal);
