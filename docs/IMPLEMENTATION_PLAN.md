@@ -149,6 +149,23 @@ xlpp/
 - Answer PRD open questions (input-cell discovery, write-back, Python binding) as scoped follow-ups.
 - **Exit:** NFR1/NFR2 met; tagged v0.1.
 
+> **Phase 6 execution notes (2026-07-10):** triage of the 746 residual
+> mismatches found a real engine-fidelity bug class, not just FP noise:
+> 1-ulp key drift crossing **lookup-table boundaries** (HiperPLC810's
+> `LM/Ll = 3.9999999999999996` vs a "4" table row selected a different row
+> and diverged 30%+). Fixed with epsilon boundary snapping (1e-9 relative)
+> in VLOOKUP/HLOOKUP/MATCH numeric candidate comparison — this alone took
+> HiperPLC810 and five LYTSwitch3/5 files to 100% with no whitelisting. The
+> remaining residuals were the InnoSwitch3-family KP1 cancellation class
+> (592 cells ≤ 1.5e-7 absolute), 3 CCM/DCM mode-label boundary flips, and
+> 1 HiperLCS cancellation cell — whitelisted with measured bounds (952
+> entries total). Incremental recalc (FR5) uses the persisted static graph:
+> dirty = formulas whose reference rects cover a changed input ∪ volatile
+> (INDIRECT/OFFSET) cells, closed over dependents; measured 0.5 ms / 2 cells
+> on a 21.9k-formula book. Final gate: `tools/corpus_gate.sh` — 97/97 files,
+> 1,437,117 evaluated cells, 0 unexplained mismatches; NFR2: 154k-formula
+> book full recalc 1.07 s.
+
 ## Testing strategy
 
 Three layers, cheapest first: (1) unit tests per function against Excel-verified fixtures, including error-input matrices; (2) parser corpus test — parse all ~600k formulas, snapshot ASTs for a sample; (3) the oracle harness — the cached values in the 97 files are a free, exhaustive regression suite; run the 14-file sample on every commit and the full corpus nightly/CI-gate.

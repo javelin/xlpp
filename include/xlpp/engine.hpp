@@ -17,11 +17,15 @@ class Engine {
 public:
     explicit Engine(WorkbookModel model);
 
-    // Overrides an input cell (detaches the formula if the cell had one).
-    // Returns false if sheet or reference is invalid.
+    // Overrides an input cell (detaches the formula if the cell had one) and
+    // marks its dependents dirty. Returns false if sheet or ref is invalid.
     bool set_value(const std::string &sheet, const std::string &ref, const Value &value);
 
-    // Full recalculation of every formula cell in dependency order.
+    // Recalculation. The first call (or any call after structural changes)
+    // computes every formula cell. Subsequent calls after set_value are
+    // incremental (FR5): only the dirty closure — cells whose static
+    // references cover a changed input, volatile cells (INDIRECT/OFFSET),
+    // and their transitive dependents — is re-evaluated.
     void recalculate();
 
     // Computed value if the cell is a formula cell (after recalculate()),
@@ -30,11 +34,12 @@ public:
     Value value(CellKey key) const;
 
     struct Stats {
-        std::size_t evaluated = 0;   // formula cells computed this recalc
-        std::size_t unsupported = 0; // constructs outside the frozen subset
-        std::size_t cyclic = 0;      // cells in cycles (iterate=false files)
-        std::size_t iterations = 0;  // fixed-point passes run (iterate=true)
-        bool converged = true;       // max |delta| < iterate_delta reached
+        std::size_t evaluated = 0;    // formula cells with a computed value
+        std::size_t unsupported = 0;  // constructs outside the frozen subset
+        std::size_t cyclic = 0;       // cells in cycles (iterate=false files)
+        std::size_t iterations = 0;   // fixed-point passes run (iterate=true)
+        std::size_t recalculated = 0; // cells evaluated by the last recalculate()
+        bool converged = true;        // max |delta| < iterate_delta reached
     };
 
     const Stats &stats() const {
@@ -46,11 +51,27 @@ public:
     }
 
 private:
+    struct RefRect {
+        std::int32_t sheet = -1;
+        std::uint32_t col_first = 0, row_first = 0;
+        std::uint32_t col_last = 0, row_last = 0;
+    };
+
     bool resolve(const std::string &sheet, const std::string &ref, CellKey &key) const;
+    void build_graph();
 
     WorkbookModel model_;
     std::unordered_map<CellKey, Value> computed_;
     Stats stats_;
+
+    // Static scheduling graph, persisted for incremental recalc.
+    bool graph_built_ = false;
+    bool cycles_seen_ = false; // iterate books fall back to full recalc
+    std::vector<std::uint32_t> order_;
+    std::vector<std::vector<std::uint32_t>> dependents_;
+    std::vector<std::vector<RefRect>> reference_rects_; // per formula
+    std::vector<bool> volatile_;                        // INDIRECT/OFFSET present
+    std::vector<CellKey> changed_inputs_;               // since last recalc
 };
 
 } // namespace xlpp

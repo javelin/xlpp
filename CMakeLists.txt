@@ -54,6 +54,11 @@ target_link_libraries(iterative_test PRIVATE xlpp_core)
 target_compile_options(iterative_test PRIVATE -Wall -Wextra)
 add_test(NAME iterative COMMAND iterative_test)
 
+add_executable(incremental_test tests/incremental_test.cpp)
+target_link_libraries(incremental_test PRIVATE xlpp_core)
+target_compile_options(incremental_test PRIVATE -Wall -Wextra)
+add_test(NAME incremental COMMAND incremental_test)
+
 add_executable(verify tools/verify.cpp)
 target_link_libraries(verify PRIVATE xlpp_core)
 target_include_directories(verify PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src) # staleness prover
