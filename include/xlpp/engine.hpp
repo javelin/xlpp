@@ -31,8 +31,10 @@ public:
 
     struct Stats {
         std::size_t evaluated = 0;   // formula cells computed this recalc
-        std::size_t unsupported = 0; // deferred constructs (Phase 4)
-        std::size_t cyclic = 0;      // cells in reference cycles (Phase 5)
+        std::size_t unsupported = 0; // constructs outside the frozen subset
+        std::size_t cyclic = 0;      // cells in cycles (iterate=false files)
+        std::size_t iterations = 0;  // fixed-point passes run (iterate=true)
+        bool converged = true;       // max |delta| < iterate_delta reached
     };
 
     const Stats &stats() const {

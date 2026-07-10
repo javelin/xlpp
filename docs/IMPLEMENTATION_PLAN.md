@@ -129,6 +129,19 @@ xlpp/
 - Tarjan SCC condensation; fixed-point solver honoring iterateCount/iterateDelta; deterministic in-SCC ordering (row-major by sheet order) to mirror Excel.
 - **Exit:** ≥ 99.9% match on all 15 `iterate="true"` workbooks.
 
+> **Phase 5 execution notes (2026-07-10):** the demand-driven engine replaced
+> SCC condensation — cycles are cut where a cell is read during its own
+> evaluation; with `iterate=true` the reader receives the previous pass's
+> value (first pass: the file's cached value, mirroring Excel's last-known
+> values) and whole-book passes repeat until max |Δ| < iterateDelta or
+> iterateCount. Corpus reality: all 15 iterate files evaluate with **zero
+> live cycles** for their saved inputs (the self-referential branches are
+> inactive) and pass at 100%, so the solver is proven by unit test
+> (`tests/iterative_test.cpp`). The LNK-PL Buck/TappedBuck "stale" regions
+> (~21.9k cells each) were root-caused: a literal `=#REF!` formula cell
+> poisons today's state-machine chain while the caches predate it (#NAME?
+> era) — genuine staleness, not fixed-point drift.
+
 ## Phase 6 — Hardening & release (≈2 weeks)
 
 - Full-corpus verification gate in CI (all 97 files); mismatch whitelist with per-cell justification.
