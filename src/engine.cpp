@@ -5,7 +5,9 @@
 #include "evaluator.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <deque>
+#include <limits>
 #include <unordered_set>
 #include <vector>
 
@@ -165,6 +167,27 @@ bool Engine::set_value(const std::string &sheet, const std::string &ref, const V
     return true;
 }
 
+namespace {
+
+// Max |change| between two values for convergence testing; kind changes and
+// error transitions count as "not converged".
+double value_delta(const Value &a, const Value &b) {
+    if (a.kind == ValueKind::number && b.kind == ValueKind::number) {
+        return std::fabs(a.number - b.number);
+    }
+    if (a.kind != b.kind) {
+        return std::numeric_limits<double>::infinity();
+    }
+    switch (a.kind) {
+    case ValueKind::text: return a.text == b.text ? 0.0 : 1.0;
+    case ValueKind::boolean: return a.boolean == b.boolean ? 0.0 : 1.0;
+    case ValueKind::error: return a.error == b.error ? 0.0 : 1.0;
+    default: return 0.0;
+    }
+}
+
+} // namespace
+
 void Engine::recalculate() {
     computed_.clear();
     stats_ = {};
@@ -221,60 +244,112 @@ void Engine::recalculate() {
     // ---- demand-driven evaluation -------------------------------------------
     // state: 0 = untouched, 1 = attempted (grey), 2 = computed. A PendingCell
     // for a grey dependency is a true dynamic cycle (the cell's value is being
-    // read while it is itself being evaluated) => cyclic diagnostic (FR6;
-    // fixed-point iteration for iterate=true files lands in Phase 5).
+    // read while it is itself being evaluated). With iterate=false that cell
+    // becomes a cyclic diagnostic; with iterate=true (FR6) the cycle is fed
+    // the previous iteration's value (first pass: the file's cached value,
+    // matching Excel's use of last-known values) and the whole book is swept
+    // again until max |delta| < iterateDelta or iterateCount passes.
     detail::Evaluator evaluator(model_, computed_);
-    std::vector<std::uint8_t> state(n, 0);
-    std::vector<std::uint32_t> work;
-    for (const std::uint32_t start : order) {
-        if (state[start] == 2) {
-            continue;
-        }
-        work.clear();
-        work.push_back(start);
-        while (!work.empty()) {
-            const std::uint32_t index = work.back();
-            const CellKey anchor = model_.formula_cells[index];
-            if (anchor == orphan_sentinel || computed_.count(anchor) != 0) {
-                state[index] = 2;
-                work.pop_back();
+    std::unordered_map<CellKey, Value> previous; // previous-pass values
+    bool cycles_hit = false;
+
+    auto run_pass = [&]() {
+        cycles_hit = false;
+        std::vector<std::uint8_t> state(n, 0);
+        std::vector<std::uint32_t> work;
+        // Cells given a previous-iteration value to break a cycle: the value
+        // serves their READERS within this pass, but the cell itself must
+        // still be recomputed when the work stack returns to it.
+        std::unordered_set<CellKey> injected;
+        for (const std::uint32_t start : order) {
+            if (state[start] == 2) {
                 continue;
             }
-            state[index] = 1;
-            try {
-                const auto member = model_.array_members.find(anchor);
-                if (member != model_.array_members.end()) {
-                    // CSE block: evaluate the matrix once, publish every
-                    // member element (later members skip via computed_).
-                    const ArrayBlock &block = model_.array_blocks[member->second.block];
-                    const std::uint32_t rows = block.row_last - block.row_first + 1;
-                    const std::uint32_t cols = block.col_last - block.col_first + 1;
-                    const std::vector<Value> elements = evaluator.evaluate_array_block(
-                        make_cell_key(block.sheet, block.col_first, block.row_first),
-                        block.ast, rows, cols);
-                    for (std::uint32_t row = 0; row < rows; ++row) {
-                        for (std::uint32_t col = 0; col < cols; ++col) {
-                            computed_[make_cell_key(block.sheet, block.col_first + col,
-                                                    block.row_first + row)] =
-                                elements[row * cols + col];
+            work.clear();
+            work.push_back(start);
+            while (!work.empty()) {
+                const std::uint32_t index = work.back();
+                const CellKey anchor = model_.formula_cells[index];
+                if (anchor == orphan_sentinel ||
+                    (computed_.count(anchor) != 0 && injected.count(anchor) == 0)) {
+                    state[index] = 2;
+                    work.pop_back();
+                    continue;
+                }
+                if (injected.count(anchor) != 0) {
+                    computed_.erase(anchor); // reader consumed the provisional
+                    injected.erase(anchor);
+                }
+                state[index] = 1;
+                try {
+                    const auto member = model_.array_members.find(anchor);
+                    if (member != model_.array_members.end()) {
+                        // CSE block: evaluate the matrix once, publish every
+                        // member element (later members skip via computed_).
+                        const ArrayBlock &block = model_.array_blocks[member->second.block];
+                        const std::uint32_t rows = block.row_last - block.row_first + 1;
+                        const std::uint32_t cols = block.col_last - block.col_first + 1;
+                        const std::vector<Value> elements = evaluator.evaluate_array_block(
+                            make_cell_key(block.sheet, block.col_first, block.row_first),
+                            block.ast, rows, cols);
+                        for (std::uint32_t row = 0; row < rows; ++row) {
+                            for (std::uint32_t col = 0; col < cols; ++col) {
+                                computed_[make_cell_key(block.sheet, block.col_first + col,
+                                                        block.row_first + row)] =
+                                    elements[row * cols + col];
+                            }
                         }
+                    } else {
+                        computed_[anchor] =
+                            evaluator.evaluate_cell(anchor, model_.formulas[index]);
                     }
-                } else {
-                    computed_[anchor] =
-                        evaluator.evaluate_cell(anchor, model_.formulas[index]);
+                    state[index] = 2;
+                    work.pop_back();
+                } catch (const detail::PendingCell &pending) {
+                    const auto cell = model_.cells.find(pending.key);
+                    const std::uint32_t dep =
+                        static_cast<std::uint32_t>(cell->second.formula);
+                    if (state[dep] == 1) {
+                        // Dynamic cycle: break it at the dependency.
+                        cycles_hit = true;
+                        if (model_.calc.iterate) {
+                            const auto prev = previous.find(pending.key);
+                            computed_[pending.key] = prev != previous.end()
+                                ? prev->second
+                                : cell->second.cached;
+                            injected.insert(pending.key);
+                        } else {
+                            computed_[pending.key] = Value::make_error(ErrorCode::cyclic);
+                        }
+                    } else {
+                        work.push_back(dep);
+                    }
                 }
-                state[index] = 2;
-                work.pop_back();
-            } catch (const detail::PendingCell &pending) {
-                const auto cell = model_.cells.find(pending.key);
-                const std::uint32_t dep =
-                    static_cast<std::uint32_t>(cell->second.formula);
-                if (state[dep] == 1) {
-                    // Dynamic cycle: break it at the dependency, then retry.
-                    computed_[pending.key] = Value::make_error(ErrorCode::cyclic);
-                } else {
-                    work.push_back(dep);
+            }
+        }
+    };
+
+    run_pass();
+
+    if (cycles_hit && model_.calc.iterate) {
+        stats_.converged = false;
+        while (stats_.iterations < model_.calc.iterate_count) {
+            ++stats_.iterations;
+            previous = std::move(computed_);
+            computed_ = {};
+            run_pass();
+            double max_delta = 0.0;
+            for (const auto &entry : computed_) {
+                const auto prev = previous.find(entry.first);
+                if (prev == previous.end()) {
+                    max_delta = std::numeric_limits<double>::infinity();
+                    break;
                 }
+                max_delta = std::max(max_delta, value_delta(entry.second, prev->second));
+            }
+            if (max_delta < model_.calc.iterate_delta) {
+                stats_.converged = true;
+                break;
             }
         }
     }
